@@ -168,7 +168,7 @@ const maxDuration = Math.max(...durations);
   <img class="header-icon" src="/header_icon.png" alt="Movie Icon" />
   <h1><span style="font-weight: 800;">IMDb</span> Movie Dashboard</h1>
 </div>
-<div class="subtitle">Discover trends, genres, and legends from the top 1000 IMDb titles over a span of 100 years.</div>
+<div class="subtitle">Discover trends, genres, and legends from the top 1000 IMDb titles over a span of 100 years!</div>
 
 <div class="stats">
   <div class="stat-card">
