@@ -13,10 +13,10 @@
 <style>
   .flip-card {
     perspective: 1000px;
-    min-width: 180px;
-    max-width: 260px;
+    min-width: 300px;
+    max-width: 390px;
     width: 100%;
-    height: 130px;
+    height: 150px;
   }
 
   .flip-card-inner {
