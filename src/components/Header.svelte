@@ -1,5 +1,5 @@
 <script>
-  import FlipCard from './FlipCard.svelte';
+  import FlipCard from './Flipcard.svelte';
   export let imdbCSV = [];
 
   const validRows = imdbCSV.filter(row =>
