@@ -2,7 +2,9 @@
   import Header from '../components/Header.svelte';
   import MoviesPerYear from '../components/charts/MoviesPerYear.svelte';
   import AvgRatingOverYear from '../components/charts/AvgRatingOverTime.svelte';
-  import GenreTrends from '../components/charts/GenreTrends.svelte'; // ⬅️ NEW chart import
+  import MetaScoreOverYear from '../components/charts/MetaScoreOverTime.svelte'; // ✅ import this
+  import GenreTrends from '../components/charts/GenreTrends.svelte';
+  import GenreBubbleChart from '../components/charts/GenreBubbleChart.svelte';
 
   export let data;
   const { imdbCSV } = data;
@@ -17,6 +19,18 @@
     🎬 Understanding Trends Over Time
   </div>
 
+  <!-- Chart 1: Films Released Each Year -->
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    "
+  >
+    <MoviesPerYear {imdbCSV} />
+  </div>
+
+  <!-- Chart 2 & 3: Side-by-side Rating Comparisons -->
   <div
     style="
       display: flex;
@@ -24,13 +38,20 @@
       gap: 2rem;
       justify-content: center;
       align-items: flex-start;
+      margin-bottom: 2rem;
     "
   >
-    <MoviesPerYear {imdbCSV} />
     <AvgRatingOverYear {imdbCSV} />
+    <MetaScoreOverYear {imdbCSV} />
   </div>
 
-  <GenreTrends {imdbCSV} /> <!-- ⬅️ ADDED below the 2 charts -->
+  <!-- Chart 4: Genre Trends -->
+<GenreTrends {imdbCSV} />
+
+<!-- Chart 5: Genre-Year IMDb Bubble Chart -->
+<div style="margin-top: 3rem;">
+  <GenreBubbleChart {imdbCSV} />
+</div>
 </section>
 
 <style>
@@ -39,8 +60,8 @@
     font-weight: bold;
     font-size: 1.6rem;
     text-align: center;
-    margin-top: 2rem;     /* 🔽 Reduced top space */
-    margin-bottom: 2.5rem; /* 🔽 Increased bottom space for better gap with charts */
+    margin-top: 2rem;
+    margin-bottom: 2.5rem;
     position: relative;
   }
 

@@ -5,8 +5,11 @@
   export let imdbCSV = [];
   let container;
   let tooltip;
+  let selectedGenres = ['Drama', 'Action', 'Comedy', 'Thriller', 'Romance'];
 
-  onMount(() => {
+  let allGenres = [];
+
+  function drawChart() {
     const margin = { top: 40, right: 150, bottom: 60, left: 60 };
     const width = 1000;
     const height = 400;
@@ -44,13 +47,15 @@
     const years = Array.from(dataByYear.keys()).sort((a, b) => a - b);
     const genresSet = new Set();
     dataByYear.forEach(counts => Object.keys(counts).forEach(g => genresSet.add(g)));
-    const genres = Array.from(genresSet);
+    allGenres = Array.from(genresSet);
 
-    genres.sort((a, b) => {
+    allGenres.sort((a, b) => {
       const sumA = d3.sum(years.map(year => (dataByYear.get(year)?.[a] || 0)));
       const sumB = d3.sum(years.map(year => (dataByYear.get(year)?.[b] || 0)));
       return sumB - sumA;
     });
+
+    const genres = selectedGenres;
 
     const stackedData = years.map(year => {
       const base = { year };
@@ -71,11 +76,7 @@
 
     const color = d3.scaleOrdinal()
       .domain(genres)
-      .range([
-        '#facc15', '#f59e0b', '#10b981', '#3b82f6', '#6366f1',
-        '#ec4899', '#ef4444', '#14b8a6', '#eab308', '#c084fc',
-        '#f472b6', '#22d3ee', '#a3e635', '#f97316', '#7c3aed'
-      ]);
+      .range(d3.schemeCategory10.concat(d3.schemeSet3));
 
     const area = d3.area()
       .x(d => x(d.data.year))
@@ -127,11 +128,10 @@
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('transform', `translate(-40, ${innerHeight / 2}) rotate(-90)`)
-      .text('Movies Released per Genre (Stacked)')
+      .text('Movies Released per Genre')
       .attr('fill', '#facc15')
       .style('font-size', '16px');
 
-    // Tooltip div
     tooltip = d3.select(container)
       .append('div')
       .style('position', 'absolute')
@@ -143,16 +143,14 @@
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
-    // Legend
     const legend = svg.append('g')
       .attr('transform', `translate(${innerWidth + 20}, 0)`);
 
-    genres.slice(0, 12).forEach((genre, i) => {
-      legend.append('rect')
-        .attr('x', 0)
-        .attr('y', i * 20)
-        .attr('width', 12)
-        .attr('height', 12)
+    genres.forEach((genre, i) => {
+      legend.append('circle')
+        .attr('cx', 6)
+        .attr('cy', i * 20 + 6)
+        .attr('r', 6)
         .attr('fill', color(genre));
 
       legend.append('text')
@@ -162,7 +160,17 @@
         .attr('fill', 'white')
         .style('font-size', '12px');
     });
-  });
+  }
+
+  function toggleGenre(genre) {
+    if (selectedGenres.includes(genre)) {
+      selectedGenres = selectedGenres.filter(g => g !== genre);
+    } else {
+      selectedGenres = [...selectedGenres, genre];
+    }
+  }
+
+  $: selectedGenres, drawChart();
 </script>
 
 <style>
@@ -184,9 +192,47 @@
     margin-bottom: 1rem;
     text-align: center;
   }
+
+  .checkbox-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: white;
+    font-size: 13px;
+  }
+
+  input[type="checkbox"] {
+    accent-color: #facc15;
+    width: 14px;
+    height: 14px;
+  }
 </style>
 
 <div class="chart-card">
-  <div class="title">📊 Genre Trends Over Time</div>
+  <div class="title">🎬 Genre Trends Over Time</div>
+  <p style="color:white; font-weight: bold;">Select Genres:</p>
+  <div class="checkbox-list">
+    {#each allGenres as genre}
+  <div class="checkbox-item">
+    <input
+      type="checkbox"
+      id={genre}
+      value={genre}
+      on:change={() => toggleGenre(genre)}
+      checked={selectedGenres.includes(genre)}
+    />
+    <label for={genre}>{genre}</label>
+  </div>
+{/each}
+  </div>
   <div bind:this={container} style="width: 100%; height: 100%; position: relative;"></div>
 </div>

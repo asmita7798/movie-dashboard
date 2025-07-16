@@ -26,49 +26,44 @@
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const ratingsByYear = d3.rollups(
-      imdbCSV.filter(d => 
-  d.IMDB_Rating && 
-  d.Released_Year && 
+    const scoresByYear = d3.rollups(
+      imdbCSV.filter(d =>
+  d.Meta_score &&
+  d.Released_Year &&
   !isNaN(+d.Released_Year)
 ),
-      v => d3.mean(v, d => +d.IMDB_Rating),
+      v => d3.mean(v, d => +d.Meta_score / 10), // ✅ normalize to 0–10
       d => +d.Released_Year
     ).sort((a, b) => a[0] - b[0]);
 
-    const years = ratingsByYear.map(d => d[0]);
-    const ratings = ratingsByYear.map(d => d[1]);
+    const years = scoresByYear.map(d => d[0]);
+    const scores = scoresByYear.map(d => d[1]);
     const minYear = d3.min(years);
     const maxYear = d3.max(years);
-    const minRating = Math.floor(d3.min(ratings));
-    const maxRating = Math.ceil(d3.max(ratings));
+    const minScore = Math.floor(d3.min(scores));
+    const maxScore = Math.ceil(d3.max(scores));
 
-    const x = d3.scaleLinear().domain([minYear, maxYear]).range([0, innerWidth]);
+    const x = d3.scaleLinear()
+  .domain([1920, maxYear])
+  .range([0, innerWidth]);
     const y = d3.scaleLinear().domain([5, 10]).range([innerHeight, 0]);
 
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
-      .call(
-        d3.axisBottom(x)
-          .tickFormat(d3.format("d"))
-          .tickSize(0) // ⬅️ remove axis ticks
-      )
+      .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickSize(0))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '14px') // ⬅️ increase font size
-      .attr('dy', '1em')          // ⬅️ vertical padding
-      .attr('dx', '0.5em');       // ⬅️ horizontal padding
+      .style('font-size', '14px')
+      .attr('dy', '1em')
+      .attr('dx', '0.5em');
 
     svg.append('g')
-      .call(
-        d3.axisLeft(y)
-          .tickSize(0) // ⬅️ remove axis ticks
-      )
+      .call(d3.axisLeft(y).tickSize(0))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '14px') // ⬅️ increase font size
-      .attr('dx', '-0.5em')       // ⬅️ horizontal padding
-      .attr('dy', '0.25em');      // ⬅️ vertical padding
+      .style('font-size', '14px')
+      .attr('dx', '-0.5em')
+      .attr('dy', '0.25em');
 
     svg.append('text')
       .attr('text-anchor', 'middle')
@@ -81,7 +76,7 @@
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('transform', `translate(-40, ${innerHeight / 2}) rotate(-90)`)
-      .text('Average IMDb Rating')
+      .text('Average Metascore (0–10)')
       .attr('fill', '#facc15')
       .style('font-size', '16px');
 
@@ -91,13 +86,12 @@
       .curve(d3.curveMonotoneX);
 
     svg.append('path')
-      .datum(ratingsByYear)
+      .datum(scoresByYear)
       .attr('fill', 'none')
       .attr('stroke', '#facc15')
       .attr('stroke-width', 2)
       .attr('d', line);
 
-    // Add tooltip container
     tooltip = d3.select(container)
       .append('div')
       .style('position', 'absolute')
@@ -110,7 +104,7 @@
       .style('opacity', 0);
 
     svg.selectAll('circle')
-      .data(ratingsByYear)
+      .data(scoresByYear)
       .enter()
       .append('circle')
       .attr('cx', d => x(d[0]))
@@ -120,7 +114,7 @@
       .on('mouseover', (event, d) => {
         tooltip
           .style('opacity', 1)
-          .html(`<strong>Year:</strong> ${d[0]}<br/><strong>Rating:</strong> ${d[1].toFixed(2)}`);
+          .html(`<strong>Year:</strong> ${d[0]}<br/><strong>Metascore:</strong> ${(d[1] * 10).toFixed(0)}`);
       })
       .on('mousemove', event => {
         tooltip
@@ -132,7 +126,6 @@
       });
   });
 </script>
-
 
 <style>
   .chart-card {
@@ -157,6 +150,6 @@
 </style>
 
 <div class="chart-card">
-  <div class="title">IMDb Score Trends</div>
+  <div class="title">Metascore Trends</div>
   <div bind:this={container} style="width: 100%; position: relative;"></div>
 </div>

@@ -6,6 +6,16 @@
   let container;
   let tooltip;
 
+  function movingAverage(data, windowSize = 5) {
+    return data.map((d, i, arr) => {
+      const start = Math.max(0, i - Math.floor(windowSize / 2));
+      const end = Math.min(arr.length, i + Math.ceil(windowSize / 2));
+      const slice = arr.slice(start, end);
+      const avg = d3.mean(slice, x => x[1]);
+      return [d[0], avg];
+    });
+  }
+
   onMount(() => {
     const margin = { top: 40, right: 30, bottom: 50, left: 60 };
     const width = 500;
@@ -26,17 +36,24 @@
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const moviesPerYear = d3.rollups(
+    // Build complete year map
+    const rawCounts = d3.rollups(
       imdbCSV.filter(d => d.Released_Year),
       v => v.length,
       d => +d.Released_Year
-    ).sort((a, b) => a[0] - b[0]);
+    );
+    const yearMap = new Map(rawCounts);
+    const allYears = d3.range(1920, 2021);
+    const filledData = allYears.map(year => [year, yearMap.get(year) || 0]);
+    const smoothedData = movingAverage(filledData, 5);
 
-    const years = moviesPerYear.map(d => d[0]);
-    const counts = moviesPerYear.map(d => d[1]);
+    const x = d3.scaleLinear()
+      .domain(d3.extent(allYears))
+      .range([0, innerWidth]);
 
-    const x = d3.scaleLinear().domain(d3.extent(years)).range([0, innerWidth]);
-    const y = d3.scaleLinear().domain([0, d3.max(counts) + 5]).range([innerHeight, 0]);
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(filledData, d => d[1]) + 5])
+      .range([innerHeight, 0]);
 
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
@@ -66,23 +83,50 @@
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('transform', `translate(-40, ${innerHeight / 2}) rotate(-90)`)
-      .text('Number of Movies')
+      .text('Count of Movies')
       .attr('fill', '#facc15')
       .style('font-size', '16px');
+
+    // Gradient for area
+    const gradient = svg.append("defs")
+      .append("linearGradient")
+      .attr("id", "area-gradient")
+      .attr("x1", "0%").attr("y1", "0%")
+      .attr("x2", "0%").attr("y2", "100%");
+
+    gradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#facc15")
+      .attr("stop-opacity", 0.7);
+
+    gradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#facc15")
+      .attr("stop-opacity", 0.15);
+
+    const area = d3.area()
+      .x(d => x(d[0]))
+      .y0(innerHeight)
+      .y1(d => y(d[1]))
+      .curve(d3.curveCatmullRom);
 
     const line = d3.line()
       .x(d => x(d[0]))
       .y(d => y(d[1]))
-      .curve(d3.curveMonotoneX);
+      .curve(d3.curveCatmullRom);
 
     svg.append('path')
-      .datum(moviesPerYear)
+      .datum(smoothedData)
+      .attr('fill', 'url(#area-gradient)')
+      .attr('d', area);
+
+    svg.append('path')
+      .datum(smoothedData)
       .attr('fill', 'none')
       .attr('stroke', '#facc15')
       .attr('stroke-width', 2)
       .attr('d', line);
 
-    // Tooltip styling
     tooltip = d3.select(container)
       .append('div')
       .style('position', 'absolute')
@@ -95,7 +139,7 @@
       .style('opacity', 0);
 
     svg.selectAll('circle')
-      .data(moviesPerYear)
+      .data(filledData)
       .enter()
       .append('circle')
       .attr('cx', d => x(d[0]))
@@ -141,6 +185,6 @@
 </style>
 
 <div class="chart-card">
-  <div class="title">🎥 Films Released Each Year</div>
+  <div class="title">Films Released Each Year</div>
   <div bind:this={container} style="width: 100%; position: relative;"></div>
 </div>

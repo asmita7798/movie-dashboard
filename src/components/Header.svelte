@@ -71,42 +71,36 @@ const topStarMovie = validRows
     color: white;
   }
 
- .header {
-  display: flex;
-  flex-direction: row;       /* ← this is key */
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0rem;
-  padding: 1.5rem 2rem;               /* ✅ Add some spacing inside */
-  margin: 2rem 0; 
-  max-width: 100%;
+.header-full {
+  background-color: #facc15; /* Yellow bg */
+  border-bottom: 4px solid #eab308; /* Darker yellow border for separation */
   width: 100%;
-  background-color: #1a1a1a;
-  border-radius: 0px;
-  box-shadow: 0 4px 12px rgba(255, 255, 0, 0.15);
-  box-sizing: border-box;
+  padding: 0.8rem 0; /* reduced padding */
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
 
-.header h1 {
-  font-size: 2.2rem;
+.header-content h1 {
+  color: black;
+  font-size: 2.5rem;
+  font-weight: 800;
   margin: 0;
-  color: #facc15;
-  font-weight: 700;
+  line-height: 1; /* Keeps height compact */
 }
-
-.header-icon {
-  width: 100px;
-  height: 100px;
-  margin-right: 1rem;
-}
-
   
   .subtitle {
     text-align: center;
-    font-size: 1.7rem;
+    font-size: 1.4rem;
     font-weight: 400;
-    margin-top: 0.2rem;
+    margin-top: 0.5rem;
     color: #d1d5db;
   }
 
@@ -136,10 +130,13 @@ const topStarMovie = validRows
 
 </style>
 
-<div class="header">
-  <img class="header-icon" src="/header_icon.png" alt="Movie Icon" />
-  <h1><span style="font-weight: 800;">IMDb</span> Movie Dashboard</h1>
+<div class="header-full">
+  <div class="header-content">
+    <h1>IMDb Movie Dashboard</h1>
+  </div>
 </div>
+
+
 <div class="subtitle">Discover trends, genres, and legends from the top 1000 IMDb titles over a span of 100 years.</div>
 
 <div class="stats">
