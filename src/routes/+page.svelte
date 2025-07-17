@@ -73,6 +73,9 @@
   <StarDirectorNetwork {imdbCSV} />
 </div>
 </section>
+<footer class="sticky-footer">
+  © 2025 <strong>Asmita Sengupta</strong>
+</footer>
 
 <style>
   .section-heading-clean {
@@ -94,4 +97,17 @@
     margin: 10px auto 0;
     border-radius: 2px;
   }
+  .sticky-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #facc15;
+  color: black;
+  text-align: left;
+  padding: 12px;
+  font-size: 14px;
+  z-index: 9999;
+  font-family: 'Segoe UI', sans-serif;
+}
+
 </style>
