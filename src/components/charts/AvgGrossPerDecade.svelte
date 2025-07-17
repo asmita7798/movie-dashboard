@@ -7,14 +7,13 @@
   let tooltip;
 
   onMount(() => {
-    const margin = { top: 40, right: 30, bottom: 50, left: 60 };
-    const width = 500;
+    const margin = { top: 40, right: 30, bottom: 60, left: 80 };
+    const width = 700;
     const height = 400;
 
     d3.select(container).selectAll('*').remove();
 
-    const svg = d3
-      .select(container)
+    const svg = d3.select(container)
       .append('svg')
       .attr('width', width)
       .attr('height', height)
@@ -26,95 +25,95 @@
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const scoresByYear = d3.rollups(
-      imdbCSV.filter(d =>
-  d.Meta_score &&
-  d.Released_Year &&
-  !isNaN(+d.Released_Year)
-),
-      v => d3.mean(v, d => +d.Meta_score / 10), 
-      d => +d.Released_Year
-    ).sort((a, b) => a[0] - b[0]);
+  
+    const parsed = imdbCSV
+      .filter(d => {
+        const year = +d.Released_Year;
+        const gross = d.Gross && d.Gross !== 'NA' ? +d.Gross.replace(/,/g, '') : NaN;
+        return !isNaN(year) && !isNaN(gross);
+      })
+      .map(d => ({
+        decade: Math.floor(+d.Released_Year / 10) * 10,
+        gross: +d.Gross.replace(/,/g, '')
+      }));
 
-    const years = scoresByYear.map(d => d[0]);
-    const scores = scoresByYear.map(d => d[1]);
-    const minYear = d3.min(years);
-    const maxYear = d3.max(years);
-    const minScore = Math.floor(d3.min(scores));
-    const maxScore = Math.ceil(d3.max(scores));
+    const revenueByDecadeRaw = d3.rollups(
+      parsed,
+      v => d3.mean(v, d => d.gross),
+      d => d.decade
+    );
+
+    const revenueByDecade = revenueByDecadeRaw
+      .map(([decade, avg]) => ({ decade, avg }))
+      .filter(d => !isNaN(d.decade) && !isNaN(d.avg))
+      .sort((a, b) => a.decade - b.decade);
 
     const x = d3.scaleLinear()
-  .domain([1920, maxYear])
-  .range([0, innerWidth]);
-    const y = d3.scaleLinear().domain([5, 10]).range([innerHeight, 0]);
+      .domain(d3.extent(revenueByDecade, d => d.decade))
+      .range([0, innerWidth]);
 
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(revenueByDecade, d => d.avg) * 1.1])
+      .range([innerHeight, 0]);
+
+    // X Axis
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickSize(0))
+      .call(d3.axisBottom(x).tickFormat(d => `${d}s`).ticks(revenueByDecade.length))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '14px')
-      .attr('dy', '1em')
-      .attr('dx', '0.5em');
+      .style('font-size', '13px');
 
+    // Y Axis
     svg.append('g')
-      .call(d3.axisLeft(y).tickSize(0))
+      .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1e6).toFixed(0)}M`))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '14px')
-      .attr('dx', '-0.5em')
-      .attr('dy', '0.25em');
+      .style('font-size', '13px');
 
+    // Labels
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + 40)
-      .text('Year')
+      .attr('y', innerHeight + 45)
+      .text('Decade')
       .attr('fill', '#facc15')
       .style('font-size', '16px');
 
     svg.append('text')
       .attr('text-anchor', 'middle')
-      .attr('transform', `translate(-40, ${innerHeight / 2}) rotate(-90)`)
-      .text('Average Metascore (0–10)')
+      .attr('transform', `translate(-50, ${innerHeight / 2}) rotate(-90)`)
+      .text('Avg Gross Revenue')
       .attr('fill', '#facc15')
       .style('font-size', '16px');
 
-    const line = d3.line()
-      .x(d => x(d[0]))
-      .y(d => y(d[1]))
-      .curve(d3.curveMonotoneX);
-
-    svg.append('path')
-      .datum(scoresByYear)
-      .attr('fill', 'none')
-      .attr('stroke', '#facc15')
-      .attr('stroke-width', 2)
-      .attr('d', line);
-
+    // Tooltip
     tooltip = d3.select(container)
       .append('div')
       .style('position', 'absolute')
       .style('background', '#facc15')
       .style('color', 'black')
-      .style('padding', '5px 8px')
+      .style('padding', '6px 10px')
       .style('border-radius', '6px')
       .style('font-size', '12px')
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
+    // Dots
     svg.selectAll('circle')
-      .data(scoresByYear)
+      .data(revenueByDecade)
       .enter()
       .append('circle')
-      .attr('cx', d => x(d[0]))
-      .attr('cy', d => y(d[1]))
-      .attr('r', 3)
+      .attr('cx', d => x(d.decade))
+      .attr('cy', d => y(d.avg))
+      .attr('r', 6)
       .attr('fill', '#facc15')
+      .attr('stroke', '#1e1e1e')
+      .attr('stroke-width', 1.5)
       .on('mouseover', (event, d) => {
         tooltip
           .style('opacity', 1)
-          .html(`<strong>Year:</strong> ${d[0]}<br/><strong>Metascore:</strong> ${(d[1] * 10).toFixed(0)}`);
+          .html(`<strong>${d.decade}s</strong><br/>Avg Gross: $${d3.format(',')(Math.round(d.avg))}`);
       })
       .on('mousemove', event => {
         tooltip
@@ -133,23 +132,20 @@
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
-    width: 100%;
-    height: 450px;
-    max-width: 500px;
-    flex: 1 1 400px;
-    margin: auto;
+    max-width: 750px;
+    margin: 3rem auto;
   }
 
   .title {
     color: #facc15;
     font-weight: bold;
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
+    font-size: 1.4rem;
     text-align: center;
+    margin-bottom: 1rem;
   }
 </style>
 
 <div class="chart-card">
-  <div class="title">Metascore Trends</div>
+  <div class="title">Avg Gross Revenue by Decade</div>
   <div bind:this={container} style="width: 100%; position: relative;"></div>
 </div>

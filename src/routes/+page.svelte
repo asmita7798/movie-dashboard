@@ -2,9 +2,13 @@
   import Header from '../components/Header.svelte';
   import MoviesPerYear from '../components/charts/MoviesPerYear.svelte';
   import AvgRatingOverYear from '../components/charts/AvgRatingOverTime.svelte';
-  import MetaScoreOverYear from '../components/charts/MetaScoreOverTime.svelte'; // ✅ import this
+  import MetaScoreOverYear from '../components/charts/MetaScoreOverTime.svelte';
   import GenreTrends from '../components/charts/GenreTrends.svelte';
   import GenreBubbleChart from '../components/charts/GenreBubbleChart.svelte';
+  import TopGrossingMovies from '../components/charts/TopGrossingMovies.svelte';
+  import AvgGrossPerDecade from '../components/charts/AvgGrossPerDecade.svelte';
+  import TopDirectors from '../components/charts/TopDirectors.svelte';
+  import StarDirectorNetwork from '../components/charts/StarDirectorNetwork.svelte';
 
   export let data;
   const { imdbCSV } = data;
@@ -29,7 +33,9 @@
   >
     <MoviesPerYear {imdbCSV} />
   </div>
-
+  <div style="margin-top: 3rem;">
+  <TopDirectors {imdbCSV} />
+</div>
   <!-- Chart 2 & 3: Side-by-side Rating Comparisons -->
   <div
     style="
@@ -51,6 +57,20 @@
 <!-- Chart 5: Genre-Year IMDb Bubble Chart -->
 <div style="margin-top: 3rem;">
   <GenreBubbleChart {imdbCSV} />
+</div>
+
+<!-- Chart 6: Top Grossing Movies -->
+<div style="margin-top: 3rem;">
+  <TopGrossingMovies {imdbCSV} />
+</div>
+
+<!-- Chart 7: Avg Gross Revenue Per Decade -->
+ <div style="margin-top: 3rem;">
+  <AvgGrossPerDecade {imdbCSV} />
+</div>
+<!-- Chart 8: Star-Director / Star-Star Network Map -->
+<div style="margin-top: 3rem;">
+  <StarDirectorNetwork {imdbCSV} />
 </div>
 </section>
 

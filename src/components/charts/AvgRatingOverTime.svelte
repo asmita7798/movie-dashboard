@@ -51,24 +51,24 @@
       .call(
         d3.axisBottom(x)
           .tickFormat(d3.format("d"))
-          .tickSize(0) // ⬅️ remove axis ticks
+          .tickSize(0) 
       )
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '14px') // ⬅️ increase font size
-      .attr('dy', '1em')          // ⬅️ vertical padding
-      .attr('dx', '0.5em');       // ⬅️ horizontal padding
+      .style('font-size', '14px') 
+      .attr('dy', '1em')          
+      .attr('dx', '0.5em');      
 
     svg.append('g')
       .call(
         d3.axisLeft(y)
-          .tickSize(0) // ⬅️ remove axis ticks
+          .tickSize(0) 
       )
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '14px') // ⬅️ increase font size
-      .attr('dx', '-0.5em')       // ⬅️ horizontal padding
-      .attr('dy', '0.25em');      // ⬅️ vertical padding
+      .style('font-size', '14px')
+      .attr('dx', '-0.5em')
+      .attr('dy', '0.25em');      
 
     svg.append('text')
       .attr('text-anchor', 'middle')

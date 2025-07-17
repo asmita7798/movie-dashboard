@@ -72,10 +72,10 @@ const topStarMovie = validRows
   }
 
 .header-full {
-  background-color: #facc15; /* Yellow bg */
-  border-bottom: 4px solid #eab308; /* Darker yellow border for separation */
+  background-color: #facc15; 
+  border-bottom: 4px solid #eab308; 
   width: 100%;
-  padding: 0.8rem 0; /* reduced padding */
+  padding: 0.8rem 0; 
 }
 
 .header-content {
@@ -106,7 +106,7 @@ const topStarMovie = validRows
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));  /* Match the min-width */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
   gap: 2rem;
   padding: 2rem;
   max-width: 1300px;

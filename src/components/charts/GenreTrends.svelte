@@ -218,7 +218,7 @@
 </style>
 
 <div class="chart-card">
-  <div class="title">🎬 Genre Trends Over Time</div>
+  <div class="title">Genre Trends Over Time</div>
   <p style="color:white; font-weight: bold;">Select Genres:</p>
   <div class="checkbox-list">
     {#each allGenres as genre}

@@ -111,7 +111,7 @@
       .attr('text-anchor', 'middle')
       .style('fill', '#facc15')
       .style('font-size', '16px')
-      .text('Released Year');
+      .text('Year');
 
     svg.append('text')
       .attr('transform', `rotate(-90)`) 
@@ -225,7 +225,7 @@
 </style>
 
 <div class="chart-card">
-  <div class="title">📊 Genre Popularity: Year vs IMDb Rating</div>
+  <div class="title">Genre Popularity: Year vs IMDb Rating</div>
   <p style="color:white; font-weight: bold;">Select Genre Groups:</p>
   <div class="checkbox-list">
     {#each genreOptions as genre}
