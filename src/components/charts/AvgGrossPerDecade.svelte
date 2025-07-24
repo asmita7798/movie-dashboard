@@ -7,7 +7,7 @@
   let tooltip;
 
   onMount(() => {
-    const margin = { top: 40, right: 30, bottom: 60, left: 80 };
+    const margin = { top: 40, right: 30, bottom: 70, left: 80 };
     const width = 700;
     const height = 400;
 
@@ -25,7 +25,7 @@
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-  
+    // --- Prepare decade-based data ---
     const parsed = imdbCSV
       .filter(d => {
         const year = +d.Released_Year;
@@ -45,37 +45,38 @@
 
     const revenueByDecade = revenueByDecadeRaw
       .map(([decade, avg]) => ({ decade, avg }))
-      .filter(d => !isNaN(d.decade) && !isNaN(d.avg))
       .sort((a, b) => a.decade - b.decade);
 
-    const x = d3.scaleLinear()
-      .domain(d3.extent(revenueByDecade, d => d.decade))
-      .range([0, innerWidth]);
+    const x = d3.scaleBand()
+      .domain(revenueByDecade.map(d => `${d.decade}s`))
+      .range([0, innerWidth])
+      .padding(0.4);
 
     const y = d3.scaleLinear()
       .domain([0, d3.max(revenueByDecade, d => d.avg) * 1.1])
       .range([innerHeight, 0]);
 
-    // X Axis
+    // --- Axes ---
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(x).tickFormat(d => `${d}s`).ticks(revenueByDecade.length))
+      .call(d3.axisBottom(x))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '13px');
+      .style('font-size', '13px')
+      .attr('transform', 'rotate(45)')
+      .style('text-anchor', 'start');
 
-    // Y Axis
     svg.append('g')
       .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1e6).toFixed(0)}M`))
       .selectAll('text')
       .style('fill', 'white')
       .style('font-size', '13px');
 
-    // Labels
+    // Axis labels
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + 45)
+      .attr('y', innerHeight + 60)
       .text('Decade')
       .attr('fill', '#facc15')
       .style('font-size', '16px');
@@ -99,17 +100,28 @@
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
-    // Dots
-    svg.selectAll('circle')
+    // --- Lollipop chart ---
+    svg.selectAll('line.stem')
+      .data(revenueByDecade)
+      .enter()
+      .append('line')
+      .attr('class', 'stem')
+      .attr('x1', d => x(`${d.decade}s`) + x.bandwidth() / 2)
+      .attr('x2', d => x(`${d.decade}s`) + x.bandwidth() / 2)
+      .attr('y1', y(0))
+      .attr('y2', d => y(d.avg))
+      .attr('stroke', '#facc15')
+      .attr('stroke-width', 2);
+
+    svg.selectAll('circle.dot')
       .data(revenueByDecade)
       .enter()
       .append('circle')
-      .attr('cx', d => x(d.decade))
+      .attr('class', 'dot')
+      .attr('cx', d => x(`${d.decade}s`) + x.bandwidth() / 2)
       .attr('cy', d => y(d.avg))
       .attr('r', 6)
       .attr('fill', '#facc15')
-      .attr('stroke', '#1e1e1e')
-      .attr('stroke-width', 1.5)
       .on('mouseover', (event, d) => {
         tooltip
           .style('opacity', 1)

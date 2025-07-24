@@ -26,7 +26,7 @@
     const svg = d3
       .select(container)
       .append('svg')
-      .attr('width', width)
+      .attr('width', '100%')  // responsive width
       .attr('height', height)
       .attr('viewBox', `0 0 ${width} ${height}`)
       .attr('preserveAspectRatio', 'xMidYMid meet')
@@ -36,7 +36,6 @@
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    // Build complete year map
     const rawCounts = d3.rollups(
       imdbCSV.filter(d => d.Released_Year),
       v => v.length,
@@ -144,8 +143,9 @@
       .append('circle')
       .attr('cx', d => x(d[0]))
       .attr('cy', d => y(d[1]))
-      .attr('r', 3)
+      .attr('r', 2)  //<!-- 50% smaller dot radius -->
       .attr('fill', '#facc15')
+      .attr('fill-opacity', 0.5) //<!-- 50% transparent -->
       .on('mouseover', (event, d) => {
         tooltip
           .style('opacity', 1)
@@ -185,6 +185,6 @@
 </style>
 
 <div class="chart-card">
-  <div class="title">Films Released Each Year</div>
+  <div class="title">IMDb Top 1000 Release Trends</div>
   <div bind:this={container} style="width: 100%; position: relative;"></div>
 </div>

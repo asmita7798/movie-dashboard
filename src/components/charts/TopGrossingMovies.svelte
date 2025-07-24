@@ -7,15 +7,15 @@
   let tooltip;
 
   onMount(() => {
-    const margin = { top: 40, right: 30, bottom: 60, left: 260 };
+    const margin = { top: 40, right: 30, bottom: 30, left: 50 };
     const width = 800;
-    const height = 500;
+    const height = 435;
 
     d3.select(container).selectAll('*').remove();
 
     const svg = d3.select(container)
       .append('svg')
-      .attr('width', width)
+      .attr('width', '100%')  // make width responsive
       .attr('height', height)
       .attr('viewBox', `0 0 ${width} ${height}`)
       .attr('preserveAspectRatio', 'xMidYMid meet')
@@ -25,7 +25,6 @@
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    
     const filtered = imdbCSV
       .filter(d => d.Gross && d.Gross !== 'NA')
       .map(d => ({
@@ -34,7 +33,7 @@
         gross: +d.Gross.replace(/,/g, '')
       }));
 
-    const top10 = filtered.sort((a, b) => b.gross - a.gross).slice(0, 10).reverse(); // reverse for bottom-up bars
+    const top10 = filtered.sort((a, b) => b.gross - a.gross).slice(0, 10).reverse();
 
     const y = d3.scaleBand()
       .domain(top10.map(d => d.title))
@@ -47,17 +46,11 @@
       .range([0, innerWidth]);
 
     svg.append('g')
-      .call(d3.axisLeft(y))
-      .selectAll('text')
-      .style('fill', 'white')
-      .style('font-size', '12px');
-
-    svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x).tickFormat(d => `$${d / 1e6}M`))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '12px');
+      .style('font-size', '16px');
 
     svg.selectAll('rect')
       .data(top10)
@@ -67,7 +60,42 @@
       .attr('x', 0)
       .attr('height', y.bandwidth())
       .attr('width', d => x(d.gross))
+      .attr('fill', '#facc15');
+
+    svg.selectAll('.bar-label')
+      .data(top10)
+      .enter()
+      .append('text')
+      .attr('class', 'bar-label')
+      .attr('x', d => x(d.gross) - 5)
+      .attr('y', d => y(d.title) + y.bandwidth() / 2)
+      .attr('dy', '0.35em')
+      .attr('text-anchor', 'end')
+      .text(d => d.title)
+      .style('fill', 'black')
+      .style('font-size', '14px')
+      .style('font-weight', '600');
+
+    svg.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('x', innerWidth / 2)
+      .attr('y', innerHeight + 45)
+      .text('Gross Revenue')
       .attr('fill', '#facc15')
+      .style('font-size', '20px');
+
+    tooltip = d3.select(container)
+      .append('div')
+      .style('position', 'absolute')
+      .style('background', '#facc15')
+      .style('color', 'black')
+      .style('padding', '5px 10px')
+      .style('border-radius', '6px')
+      .style('font-size', '16px')
+      .style('pointer-events', 'none')
+      .style('opacity', 0);
+
+    svg.selectAll('rect')
       .on('mouseover', (event, d) => {
         tooltip
           .style('opacity', 1)
@@ -78,39 +106,22 @@
           .style('left', event.offsetX + 20 + 'px')
           .style('top', event.offsetY - 20 + 'px');
       })
-      .on('mouseout', () => {
-        tooltip.style('opacity', 0);
-      });
-
-    svg.append('text')
-      .attr('text-anchor', 'middle')
-      .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + 50)
-      .text('Gross Revenue')
-      .attr('fill', '#facc15')
-      .style('font-size', '16px');
-
-    tooltip = d3.select(container)
-      .append('div')
-      .style('position', 'absolute')
-      .style('background', '#facc15')
-      .style('color', 'black')
-      .style('padding', '5px 10px')
-      .style('border-radius', '6px')
-      .style('font-size', '13px')
-      .style('pointer-events', 'none')
-      .style('opacity', 0);
+      .on('mouseout', () => tooltip.style('opacity', 0));
   });
 </script>
 
 <style>
   .chart-card {
     background-color: #1e1e1e;
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
-    max-width: 850px;
-    margin: 2rem auto;
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+    max-width: 500px;
+    flex: 1 1 400px;
+    margin: auto;
   }
 
   .title {
@@ -118,7 +129,7 @@
     font-weight: bold;
     font-size: 1.3rem;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
   }
 </style>
 

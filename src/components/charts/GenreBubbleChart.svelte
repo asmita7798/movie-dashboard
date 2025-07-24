@@ -4,7 +4,9 @@
   export let imdbCSV = [];
 
   let container;
-  let selectedGenres = ['Action/Adventure', 'Comedy', 'Drama', 'Crime/Thriller']; // default
+  let selectedGenres = [];
+
+  // Genre grouping
   const genreGroupMap = {
     Action: 'Action/Adventure', Adventure: 'Action/Adventure',
     Comedy: 'Comedy',
@@ -19,12 +21,15 @@
   };
 
   const genreOptions = Array.from(new Set(Object.values(genreGroupMap))).sort();
+  selectedGenres = [...genreOptions]; // default: all selected
 
   function toggleGenre(genre) {
-    if (selectedGenres.includes(genre)) {
-      selectedGenres = selectedGenres.filter(g => g !== genre);
+    if (genre === 'All') {
+      selectedGenres = selectedGenres.length === genreOptions.length ? [] : [...genreOptions];
     } else {
-      selectedGenres = [...selectedGenres, genre];
+      selectedGenres = selectedGenres.includes(genre)
+        ? selectedGenres.filter(g => g !== genre)
+        : [...selectedGenres, genre];
     }
   }
 
@@ -47,30 +52,32 @@
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    const genreYearMap = new Map();
-
+    // --- Aggregate by decade ---
+    const genreDecadeMap = new Map();
     imdbCSV.forEach(d => {
       const year = +d.Released_Year;
+      if (!year) return;
+      const decade = Math.floor(year / 10) * 10;
       const genres = d.Genre ? d.Genre.split(',').map(g => g.trim()) : [];
       const rating = parseFloat(d.IMDB_Rating);
-      if (!isNaN(year) && rating && genres.length) {
+      if (!isNaN(rating) && genres.length) {
         genres.forEach(genre => {
           const grouped = genreGroupMap[genre] || genre;
-          const key = `${grouped}-${year}`;
-          if (!genreYearMap.has(key)) {
-            genreYearMap.set(key, { genre: grouped, year, totalRating: 0, count: 0 });
+          const key = `${grouped}-${decade}`;
+          if (!genreDecadeMap.has(key)) {
+            genreDecadeMap.set(key, { genre: grouped, decade, totalRating: 0, count: 0 });
           }
-          const entry = genreYearMap.get(key);
+          const entry = genreDecadeMap.get(key);
           entry.totalRating += rating;
           entry.count += 1;
         });
       }
     });
 
-    let data = Array.from(genreYearMap.values())
+    let data = Array.from(genreDecadeMap.values())
       .map(d => ({
         genre: d.genre,
-        year: d.year,
+        decade: d.decade,
         avgRating: d.totalRating / d.count,
         count: d.count
       }))
@@ -80,30 +87,24 @@
       data = data.filter(d => selectedGenres.includes(d.genre));
     }
 
-    const x = d3.scaleLinear()
-      .domain(d3.extent(data, d => d.year))
-      .range([0, innerWidth]);
+    // Add padding to decade range so 1920 isn't on the y-axis
+    const decadeExtent = d3.extent(data, d => d.decade);
+    decadeExtent[0] -= 5;  
+    decadeExtent[1] += 5;  
 
-    const y = d3.scaleLinear()
-      .domain([5, 10])
-      .range([innerHeight, 0]);
-
-    const r = d3.scaleSqrt()
-      .domain([0, d3.max(data, d => d.count)])
-      .range([3, 20]);
-
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const x = d3.scaleLinear().domain(decadeExtent).range([0, innerWidth]);
+    const y = d3.scaleLinear().domain([5, 10]).range([innerHeight, 0]);
+    const r = d3.scaleSqrt().domain([0, d3.max(data, d => d.count)]).range([5, 25]);
+    const color = d3.scaleOrdinal(d3.schemeTableau10);   // modern palette
 
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x).tickFormat(d3.format('d')))
-      .selectAll('text')
-      .style('fill', 'white');
+      .selectAll('text').style('fill', 'white');
 
     svg.append('g')
       .call(d3.axisLeft(y))
-      .selectAll('text')
-      .style('fill', 'white');
+      .selectAll('text').style('fill', 'white');
 
     svg.append('text')
       .attr('x', innerWidth / 2)
@@ -111,7 +112,7 @@
       .attr('text-anchor', 'middle')
       .style('fill', '#facc15')
       .style('font-size', '16px')
-      .text('Year');
+      .text('Decade');
 
     svg.append('text')
       .attr('transform', `rotate(-90)`) 
@@ -133,32 +134,46 @@
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
-    svg.selectAll('circle')
+    // --- Initial positions ---
+    data.forEach(d => {
+      d.x = x(d.decade);
+      d.y = y(d.avgRating);
+    });
+
+    // --- Force simulation for collision avoidance ---
+    const simulation = d3.forceSimulation(data)
+      .force('x', d3.forceX(d => x(d.decade)).strength(1))
+      .force('y', d3.forceY(d => y(d.avgRating)).strength(1))
+      .force('collide', d3.forceCollide(d => r(d.count) + 2))
+      .stop();
+    for (let i = 0; i < 200; i++) simulation.tick();
+
+    const circles = svg.selectAll('circle')
       .data(data)
       .enter()
       .append('circle')
-      .attr('cx', d => x(d.year))
-      .attr('cy', d => y(d.avgRating))
-      .attr('r', d => r(d.count))
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('r', 0)  // start small for animation
       .attr('fill', d => color(d.genre))
       .attr('opacity', 0.7)
       .on('mouseover', (event, d) => {
         tooltip
           .style('opacity', 1)
-          .html(`<strong>${d.genre}</strong><br/>Year: ${d.year}<br/>Rating: ${d.avgRating.toFixed(2)}<br/>Movies: ${d.count}`);
+          .html(`<strong>${d.genre}</strong><br/>Decade: ${d.decade}s<br/>Rating: ${d.avgRating.toFixed(2)}<br/>Movies: ${d.count}`);
       })
       .on('mousemove', event => {
-        tooltip
-          .style('left', event.offsetX + 15 + 'px')
-          .style('top', event.offsetY - 28 + 'px');
+        tooltip.style('left', event.offsetX + 15 + 'px').style('top', event.offsetY - 28 + 'px');
       })
-      .on('mouseout', () => {
-        tooltip.style('opacity', 0);
-      });
+      .on('mouseout', () => tooltip.style('opacity', 0));
 
-    const legend = svg.append('g')
-      .attr('transform', `translate(${innerWidth + 30}, 0)`);
+    // --- Animate circle growth ---
+    circles.transition()
+      .duration(1000)
+      .ease(d3.easeElastic)
+      .attr('r', d => r(d.count));
 
+    const legend = svg.append('g').attr('transform', `translate(${innerWidth + 60}, 0)`);
     const genresInView = [...new Set(data.map(d => d.genre))];
 
     genresInView.forEach((genre, i) => {
@@ -166,14 +181,32 @@
         .attr('cx', 0)
         .attr('cy', i * 24)
         .attr('r', 6)
-        .attr('fill', color(genre));
+        .attr('fill', color(genre))
+        .style('cursor', 'pointer')
+        .on('mouseover', () => {
+          // highlight selected genre
+          circles.transition().duration(200)
+            .attr('opacity', d => (d.genre === genre ? 1 : 0.1));
+        })
+        .on('mouseout', () => {
+          // reset
+          circles.transition().duration(200).attr('opacity', 0.7);
+        });
 
       legend.append('text')
         .attr('x', 12)
         .attr('y', i * 24 + 5)
         .attr('fill', 'white')
         .style('font-size', '12px')
-        .text(genre);
+        .text(genre)
+        .style('cursor', 'pointer')
+        .on('mouseover', () => {
+          circles.transition().duration(200)
+            .attr('opacity', d => (d.genre === genre ? 1 : 0.1));
+        })
+        .on('mouseout', () => {
+          circles.transition().duration(200).attr('opacity', 0.7);
+        });
     });
   }
 
@@ -228,6 +261,10 @@
   <div class="title">Genre Popularity: Year vs IMDb Rating</div>
   <p style="color:white; font-weight: bold;">Select Genre Groups:</p>
   <div class="checkbox-list">
+    <div class="checkbox-item">
+      <input type="checkbox" id="All" value="All" on:change={() => toggleGenre('All')} checked={selectedGenres.length === genreOptions.length} />
+      <label for="All">All</label>
+    </div>
     {#each genreOptions as genre}
       <div class="checkbox-item">
         <input

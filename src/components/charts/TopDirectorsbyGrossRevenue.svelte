@@ -5,23 +5,29 @@
   export let imdbCSV = [];
   let container;
   let tooltip;
-  let selectedMetric = 'movies'; 
 
-  const metrics = {
-    movies: 'Total Movies',
-    gross: 'Total Gross Revenue'
-  };
+  // Helper to split director names into two lines
+  function splitName(name) {
+    const words = name.split(' ');
+    const half = Math.ceil(words.length / 2);
+    return [words.slice(0, half).join(' '), words.slice(half).join(' ')];
+  }
+
+  onMount(() => {
+    if (imdbCSV.length) drawChart();
+  });
 
   $: if (imdbCSV.length) drawChart();
 
   function drawChart() {
-    const margin = { top: 60, right: 30, bottom: 60, left: 100 };
+    if (!container) return;
+
+    const margin = { top: 80, right: 30, bottom: 80, left: 100 };
     const width = 900;
-    const height = 450;
+    const height = 400;
 
     d3.select(container).selectAll('*').remove();
 
-    // Tooltip div
     tooltip = d3.select(container)
       .append('div')
       .style('position', 'absolute')
@@ -36,13 +42,17 @@
 
     const svg = d3.select(container)
       .append('svg')
-      .attr('width', width)
+      .attr('width', '100%')
       .attr('height', height)
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'xMidYMid meet')
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
+
+    const selectedMetric = 'gross';
 
     const parsed = imdbCSV
       .filter(d =>
@@ -88,17 +98,37 @@
       .domain([0, d3.max(topDirectors, d => d.value) * 1.2])
       .range([innerHeight, 0]);
 
+    // X Axis
     svg.append('g')
       .attr('transform', `translate(0, ${innerHeight})`)
       .call(d3.axisBottom(x))
       .selectAll('text')
       .style('fill', 'white');
 
+    // Y Axis
     svg.append('g')
-      .call(d3.axisLeft(y).ticks(5))
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d => `$${(d / 1e6).toFixed(0)}M`))
       .selectAll('text')
       .style('fill', 'white');
 
+    // X axis label
+    svg.append('text')
+      .attr('x', innerWidth / 2)
+      .attr('y', innerHeight + 50)
+      .attr('text-anchor', 'middle')
+      .text('Decade')
+      .attr('fill', '#facc15')
+      .style('font-size', '16px');
+
+    // Y axis label
+    svg.append('text')
+      .attr('transform', `translate(-60, ${innerHeight / 2}) rotate(-90)`)
+      .attr('text-anchor', 'middle')
+      .text('Gross Revenue')
+      .attr('fill', '#facc15')
+      .style('font-size', '16px');
+
+    // Bars
     svg.selectAll('.bar')
       .data(topDirectors)
       .join('rect')
@@ -113,11 +143,7 @@
           .style('display', 'block')
           .html(`<strong>Decade:</strong> ${d.decade}s<br>
                  <strong>Director:</strong> ${d.director}<br>
-                 <strong>${metrics[selectedMetric]}:</strong> ${
-                   selectedMetric === 'gross'
-                     ? '$' + d3.format(',')(d.value)
-                     : d.value
-                 }`);
+                 <strong>Gross Revenue:</strong> $${d3.format(',')(d.value)}`);
       })
       .on('mousemove', event => {
         tooltip
@@ -126,11 +152,39 @@
       })
       .on('mouseout', () => tooltip.style('display', 'none'));
 
+    // Director names above bars (split into two lines)
+    svg.selectAll('.director-label')
+      .data(topDirectors)
+      .join('text')
+      .attr('class', 'director-label')
+      .attr('x', d => x(`${d.decade}s`) + x.bandwidth() / 2)
+      .attr('y', d => y(d.value) - 24)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#facc15')
+      .style('font-size', '11px')
+      .style('font-weight', 'bold')
+      .style('pointer-events', 'none')
+      .each(function(d) {
+        const [line1, line2] = splitName(d.director);
+        d3.select(this).html('');
+        d3.select(this)
+          .append('tspan')
+          .attr('x', x(`${d.decade}s`) + x.bandwidth() / 2)
+          .attr('dy', '0em')
+          .text(line1);
+        d3.select(this)
+          .append('tspan')
+          .attr('x', x(`${d.decade}s`) + x.bandwidth() / 2)
+          .attr('dy', '1.2em')
+          .text(line2);
+      });
+
+    // Chart title
     svg.append('text')
       .attr('x', innerWidth / 2)
-      .attr('y', -20)
+      .attr('y', -40)
       .attr('text-anchor', 'middle')
-      .text(`Top Director per Decade (${metrics[selectedMetric]})`)
+      .text(`Top Director per Decade (Gross Revenue)`)
       .attr('fill', '#facc15')
       .style('font-size', '18px')
       .style('font-weight', 'bold');
@@ -147,27 +201,6 @@
     max-width: 960px;
     position: relative;
   }
-  .dropdown {
-    margin: 1rem auto;
-    text-align: center;
-  }
-  select {
-    background: #facc15;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-  }
 </style>
 
-<div class="chart-card">
-  <div class="dropdown">
-    <label for="metric">Select: </label>
-    <select id="metric" bind:value={selectedMetric} on:change={drawChart}>
-      <option value="movies">Total Movies</option>
-      <option value="gross">Gross Revenue</option>
-    </select>
-  </div>
-  <div bind:this={container}></div>
-</div>
+<div class="chart-card" bind:this={container}></div>
