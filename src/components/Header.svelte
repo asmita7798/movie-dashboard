@@ -6,14 +6,9 @@
   );
 
   const totalMovies = validRows.length;
-
   const avgRating = (
     validRows.reduce((sum, row) => sum + parseFloat(row['IMDB_Rating']), 0) / totalMovies
   ).toFixed(1);
-
-  const ratings = validRows.map(row => parseFloat(row['IMDB_Rating']));
-  const minRating = Math.min(...ratings).toFixed(1);
-  const maxRating = Math.max(...ratings).toFixed(1);
 
   const genreSet = new Set();
   validRows.forEach(row => row['Genre']?.split(',').forEach(g => genreSet.add(g.trim())));
@@ -72,46 +67,27 @@
   }
   .header-content h1 {
     color: black;
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     font-weight: 800;
     margin: 0;
   }
-  .subtitle {
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: 400;
-    margin-top: 0.5rem;
-    color: #d1d5db;
+
+  /* Single row grid */
+  .stats.single-row {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 0.8rem;
+    width: 100%;
+    padding: 1rem 2rem;
+    box-sizing: border-box;
   }
 
-  /* Compact headings */
-  .section-heading {
-    color: #facc15;
-    font-weight: bold;
-    font-size: 1.4rem;
-    text-align: center;
-    margin: 0.8rem 0 0.5rem; /* reduced spacing */
-  }
-  .section-heading:first-of-type {
-    margin-top: 0.5rem; /* make Overview closer to subtitle */
-  }
-
-  /* Card grid layouts */
-  .stats.overview {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0.6rem; /* tighter spacing */
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0.5rem; /* reduced padding */
-  }
-  .stats.insights {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.6rem;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0.5rem;
+  /* Horizontal divider */
+  .horizontal-divider {
+    border: none;
+    border-top: 2px solid #facc15;
+    margin: 1.5rem 2rem;
+    width: calc(100% - 4rem);
   }
 
   /* Card styling */
@@ -122,7 +98,7 @@
     justify-content: center;
     background: #111;
     border-radius: 10px;
-    height: 80px;  /* slightly shorter */
+    height: 80px;
     width: 100%;
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.6);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -133,7 +109,7 @@
   }
 
   .stat-value {
-    font-size: 1.1rem; /* slightly smaller for compactness */
+    font-size: 1.1rem;
     font-weight: bold;
     color: #facc15;
     text-align: center;
@@ -143,78 +119,39 @@
     color: #ccc;
     text-align: center;
   }
-  .label-explanation {
-  display: block; /* moves to next line */
-  font-size: 0.75rem; /* smaller font */
-  color: #aaa;       /* lighter color */
-  margin-top: 0.2rem;
-}
 
+  /* Responsive - auto-wrap on small screens */
+  @media (max-width: 1200px) {
+    .stats.single-row {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+  @media (max-width: 768px) {
+    .stats.single-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
 </style>
 
 <div class="header-full">
   <div class="header-content">
-    <h1>IMDb Movie Dashboard</h1>
-  </div>
-</div>
-<div class="subtitle">
-  Discover trends, genres, and legends from the top 1000 IMDb titles over a span of 100 years.
-</div>
-
-<!-- Overview Cards -->
-<div class="section-heading">Key Stats at a Glance</div>
-<div class="stats overview">
-  <div class="stat-card">
-    <div class="stat-value">{totalMovies}</div>
-    <div class="stat-label">Total Movies</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{avgRating}</div>
-    <div class="stat-label">Avg IMDb Rating</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{totalDirectors}</div>
-    <div class="stat-label">Directors</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{totalStars}</div>
-    <div class="stat-label">Stars</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{avgRuntime} min</div>
-    <div class="stat-label">Avg Runtime</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{genreCount}</div>
-    <div class="stat-label">Genres</div>
+    <h1>IMDb Top 1000 Movie Dashboard</h1>
   </div>
 </div>
 
-<!-- Insight Cards -->
-<div class="section-heading">Top Performers & Trends</div>
-<div class="stats insights">
-  <div class="stat-card">
-    <div class="stat-value">{popularDirector}</div>
-    <div class="stat-label">
-  Top Director <span class="label-explanation">(by total movies)</span>
+<!-- Single row of all 10 cards -->
+<div class="stats single-row">
+  <div class="stat-card"><div class="stat-value">{totalMovies}</div><div class="stat-label">Total Movies</div></div>
+  <div class="stat-card"><div class="stat-value">{avgRating}</div><div class="stat-label">Avg IMDb Rating</div></div>
+  <div class="stat-card"><div class="stat-value">{totalDirectors}</div><div class="stat-label">Directors</div></div>
+  <div class="stat-card"><div class="stat-value">{totalStars}</div><div class="stat-label">Stars</div></div>
+  <div class="stat-card"><div class="stat-value">{avgRuntime} min</div><div class="stat-label">Avg Runtime</div></div>
+  <div class="stat-card"><div class="stat-value">{genreCount}</div><div class="stat-label">Genres</div></div>
+  <div class="stat-card"><div class="stat-value">{popularDirector}</div><div class="stat-label">Most Movies Directed</div></div>
+  <div class="stat-card"><div class="stat-value">{popularStar}</div><div class="stat-label">Most Appeared Star</div></div>
+  <div class="stat-card"><div class="stat-value">{topGenre}</div><div class="stat-label">Genre with Most Movies</div></div>
+  <div class="stat-card"><div class="stat-value">{topRatedMovie}</div><div class="stat-label">Top IMDb Movie</div></div>
 </div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{popularStar}</div>
-    <div class="stat-label">
-  Top Star <span class="label-explanation">(by total appearances)</span>
-</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{topGenre}</div>
-    <div class="stat-label">
-  Top Genre <span class="label-explanation">(by total movies)</span>
-</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">{topRatedMovie}</div>
-    <div class="stat-label">
-  Top Rated Movie <span class="label-explanation">(by IMDb rating)</span>
-</div>
-  </div>
-</div>
+
+<!-- Horizontal Divider -->
+<hr class="horizontal-divider" />

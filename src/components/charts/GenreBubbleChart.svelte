@@ -38,7 +38,7 @@
 
     const margin = { top: 40, right: 200, bottom: 60, left: 80 };
     const width = 960;
-    const height = 540;
+    const height = 350;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -87,23 +87,36 @@
       data = data.filter(d => selectedGenres.includes(d.genre));
     }
 
-    // Add padding to decade range so 1920 isn't on the y-axis
+    // --- Scales ---
     const decadeExtent = d3.extent(data, d => d.decade);
     decadeExtent[0] -= 5;  
     decadeExtent[1] += 5;  
 
     const x = d3.scaleLinear().domain(decadeExtent).range([0, innerWidth]);
-    const y = d3.scaleLinear().domain([5, 10]).range([innerHeight, 0]);
-    const r = d3.scaleSqrt().domain([0, d3.max(data, d => d.count)]).range([5, 25]);
-    const color = d3.scaleOrdinal(d3.schemeTableau10);   // modern palette
 
+    const ratingExtent = d3.extent(data, d => d.avgRating);
+    const padding = 0.2;
+    const y = d3.scaleLinear()
+      .domain([ratingExtent[0] - padding, ratingExtent[1] + padding])
+      .range([innerHeight, 0]);
+
+    const r = d3.scaleSqrt().domain([0, d3.max(data, d => d.count)]).range([5, 25]);
+    const color = d3.scaleOrdinal(d3.schemeTableau10);
+
+    // --- Axes ---
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x).tickFormat(d3.format('d')))
       .selectAll('text').style('fill', 'white');
 
+    // *** Force y-axis ticks at every 0.5 ***
+    const yTicks = [];
+    for (let t = Math.floor((ratingExtent[0] - padding) * 2) / 2; t <= (ratingExtent[1] + padding); t += 0.5) {
+      yTicks.push(+t.toFixed(1));
+    }
+
     svg.append('g')
-      .call(d3.axisLeft(y))
+      .call(d3.axisLeft(y).tickValues(yTicks))
       .selectAll('text').style('fill', 'white');
 
     svg.append('text')
@@ -134,19 +147,19 @@
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
-    // --- Initial positions ---
+    // --- Jitter to avoid perfect stacking ---
     data.forEach(d => {
-      d.x = x(d.decade);
-      d.y = y(d.avgRating);
+      d.x = x(d.decade) + (Math.random() - 0.5) * 10;   // horizontal jitter
+      d.y = y(d.avgRating) + (Math.random() - 0.5) * 5; // vertical jitter
     });
 
-    // --- Force simulation for collision avoidance ---
+    // --- Stronger collision avoidance ---
     const simulation = d3.forceSimulation(data)
-      .force('x', d3.forceX(d => x(d.decade)).strength(1))
-      .force('y', d3.forceY(d => y(d.avgRating)).strength(1))
-      .force('collide', d3.forceCollide(d => r(d.count) + 2))
+      .force('x', d3.forceX(d => x(d.decade)).strength(0.8))
+      .force('y', d3.forceY(d => y(d.avgRating)).strength(0.8))
+      .force('collide', d3.forceCollide(d => r(d.count) + 4))
       .stop();
-    for (let i = 0; i < 200; i++) simulation.tick();
+    for (let i = 0; i < 300; i++) simulation.tick();
 
     const circles = svg.selectAll('circle')
       .data(data)
@@ -154,7 +167,7 @@
       .append('circle')
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
-      .attr('r', 0)  // start small for animation
+      .attr('r', 0) 
       .attr('fill', d => color(d.genre))
       .attr('opacity', 0.7)
       .on('mouseover', (event, d) => {
@@ -167,7 +180,6 @@
       })
       .on('mouseout', () => tooltip.style('opacity', 0));
 
-    // --- Animate circle growth ---
     circles.transition()
       .duration(1000)
       .ease(d3.easeElastic)
@@ -184,12 +196,10 @@
         .attr('fill', color(genre))
         .style('cursor', 'pointer')
         .on('mouseover', () => {
-          // highlight selected genre
           circles.transition().duration(200)
             .attr('opacity', d => (d.genre === genre ? 1 : 0.1));
         })
         .on('mouseout', () => {
-          // reset
           circles.transition().duration(200).attr('opacity', 0.7);
         });
 

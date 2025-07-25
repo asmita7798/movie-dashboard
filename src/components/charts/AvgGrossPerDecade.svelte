@@ -5,11 +5,12 @@
   export let imdbCSV = [];
   let container;
   let tooltip;
+  let resizeObserver;
 
-  onMount(() => {
+  function drawChart(width, height) {
     const margin = { top: 40, right: 30, bottom: 70, left: 80 };
-    const width = 700;
-    const height = 400;
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
 
     d3.select(container).selectAll('*').remove();
 
@@ -17,13 +18,8 @@
       .append('svg')
       .attr('width', width)
       .attr('height', height)
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('preserveAspectRatio', 'xMidYMid meet')
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
 
     // --- Prepare decade-based data ---
     const parsed = imdbCSV
@@ -132,9 +128,17 @@
           .style('left', event.offsetX + 15 + 'px')
           .style('top', event.offsetY - 28 + 'px');
       })
-      .on('mouseout', () => {
-        tooltip.style('opacity', 0);
-      });
+      .on('mouseout', () => tooltip.style('opacity', 0));
+  }
+
+  onMount(() => {
+    resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        drawChart(width, height);
+      }
+    });
+    resizeObserver.observe(container);
   });
 </script>
 
@@ -144,10 +148,9 @@
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
-    max-width: 750px;
-    margin: 3rem auto;
+    width: 100%;
+    height: 100%;
   }
-
   .title {
     color: #facc15;
     font-weight: bold;
@@ -159,5 +162,5 @@
 
 <div class="chart-card">
   <div class="title">Avg Gross Revenue by Decade</div>
-  <div bind:this={container} style="width: 100%; position: relative;"></div>
+  <div bind:this={container} style="width: 100%; height: calc(100% - 2rem); position: relative;"></div>
 </div>

@@ -8,6 +8,7 @@
   import TopDirectorsbyGrossRevenue from '../components/charts/TopDirectorsbyGrossRevenue.svelte';
   import StarDirectorNetwork from '../components/charts/StarDirectorNetwork.svelte';
   import RatingsOverTime from '../components/charts/RatingsOverTime.svelte';
+  import StarHeatmap from '../components/charts/StarHeatmap.svelte';
 
   export let data;
   const { imdbCSV } = data;
@@ -16,46 +17,31 @@
 <Header {imdbCSV} />
 
 <section class="chart-section">
-  <div class="section-heading-clean">🎬 Understanding Trends Over Time</div>
-
   <div class="container">
 
-    <!-- First row: two charts side by side -->
-    <div class="flex-row">
-      <div class="flex-item">
-        <MoviesPerYear {imdbCSV} />
-      </div>
-      <div class="flex-item">
-        <TopGrossingMovies {imdbCSV} />
-      </div>
+    <!-- Row 1: three charts -->
+    <div class="flex-row three-charts">
+      <div class="flex-item"><MoviesPerYear {imdbCSV} /></div>
+      <div class="flex-item"><AvgGrossPerDecade {imdbCSV} /></div>
+      <div class="flex-item"><TopGrossingMovies {imdbCSV} /></div>
     </div>
 
-    <!-- Second row: two charts side by side -->
-    <div class="flex-row">
-      <div class="flex-item">
-        <TopDirectorsbyMovies {imdbCSV} />
-      </div>
-      <div class="flex-item">
-        <TopDirectorsbyGrossRevenue {imdbCSV} />
-      </div>
+    <!-- Row 2: full-width Genre Bubble chart -->
+    <div class="flex-row full-width">
+      <div class="flex-item bubble-box"><GenreBubbleChart {imdbCSV} /></div>
     </div>
 
-    
-    <!-- Rest of the charts -->
-    <div class="chart-grid">
-      <RatingsOverTime {imdbCSV} />
+    <!-- Row 3: three charts -->
+    <div class="flex-row three-charts">
+      <div class="flex-item"><RatingsOverTime {imdbCSV} /></div>
+      <div class="flex-item"><TopDirectorsbyMovies {imdbCSV} /></div>
+      <div class="flex-item"><TopDirectorsbyGrossRevenue {imdbCSV} /></div>
     </div>
 
-    <div class="chart-wrapper">
-      <GenreBubbleChart {imdbCSV} />
-    </div>
-
-    <div class="chart-wrapper">
-      <AvgGrossPerDecade {imdbCSV} />
-    </div>
-
-    <div class="chart-wrapper">
-      <StarDirectorNetwork {imdbCSV} />
+    <!-- Row 4: two charts -->
+    <div class="flex-row two-charts">
+      <div class="flex-item"><StarHeatmap {imdbCSV} /></div>
+      <div class="flex-item"><StarDirectorNetwork {imdbCSV} /></div>
     </div>
 
   </div>
@@ -66,12 +52,8 @@
 </footer>
 
 <style>
-  :global(body) {
-    overflow-x: hidden; /* prevent horizontal scroll globally */
-  }
-
   .chart-section {
-    padding: 2rem;
+    padding: 2rem 2rem;
     background: #0a0a0a;
   }
 
@@ -81,60 +63,87 @@
     padding: 0 1rem;
   }
 
-  .section-heading-clean {
-    color: #facc15;
-    font-weight: bold;
-    font-size: 1.6rem;
-    text-align: center;
-    margin-top: 2rem;
-    margin-bottom: 2.5rem;
-    position: relative;
-  }
-  .section-heading-clean::after {
-    content: '';
-    display: block;
-    width: 220px;
-    height: 4px;
-    background: #facc15;
-    margin: 10px auto 0;
-    border-radius: 2px;
-  }
-
-  /* Flex container for side by side charts */
   .flex-row {
     display: flex;
     justify-content: space-between;
     gap: 2rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
+    margin-bottom: 2rem; /* spacing between rows */
+    flex-wrap: nowrap;
   }
 
-  /* Each chart takes about half width, limited max */
-  .flex-item {
-    flex: 1 1 48%;
-    max-width: 600px;
+  /* Row 1 & Row 3 (3 charts each) */
+  .three-charts .flex-item {
+    flex: 1 1 30%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .three-charts .flex-item > :global(*) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Row 2 (full width Genre Bubble chart) */
+  .full-width .flex-item.bubble-box {
+    flex: 1 1 100%;
+    min-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* align top */
+    padding: 1rem; /* uniform top/bottom/left/right */
     box-sizing: border-box;
   }
-
-  /* Make chart components responsive */
-  .flex-item > :global(*) {
-    width: 100% !important;
+  /* Adjust internal bubble chart width like top row */
+  .full-width .flex-item.bubble-box > :global(*) {
+    width: 95% !important;
     height: auto !important;
   }
-
-  .chart-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    justify-content: center;
-    align-items: flex-start;
-    margin-bottom: 2rem;
+  /* Adjust title spacing */
+  .full-width .flex-item.bubble-box :global(.title) {
+    margin-bottom: 0.75rem;
   }
 
-  .chart-wrapper {
+  /* Row 4 (two charts) */
+  .two-charts .flex-item {
+    flex: 1 1 48%;
+    height: 400px;
     display: flex;
     justify-content: center;
-    margin-bottom: 2rem;
+    align-items: center;
+  }
+  .two-charts .flex-item > :global(*) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Responsive breakpoints */
+  @media (max-width: 1100px) {
+    .flex-row {
+      flex-wrap: wrap;
+    }
+    .three-charts .flex-item,
+    .two-charts .flex-item,
+    .full-width .flex-item {
+      flex: 1 1 100%;
+      height: 350px;
+      margin-bottom: 2rem;
+    }
+    .full-width .flex-item.bubble-box {
+      min-height: 500px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .three-charts .flex-item,
+    .two-charts .flex-item,
+    .full-width .flex-item {
+      flex: 1 1 100%;
+      height: 300px;
+    }
+    .full-width .flex-item.bubble-box {
+      min-height: 450px;
+    }
   }
 
   .sticky-footer {
@@ -147,17 +156,5 @@
     padding: 12px;
     font-size: 14px;
     z-index: 9999;
-    font-family: 'Segoe UI', sans-serif;
-  }
-
-  /* Responsive stacking on narrow viewports */
-  @media (max-width: 700px) {
-    .flex-row {
-      flex-direction: column;
-    }
-    .flex-item {
-      max-width: 100%;
-      flex-basis: 100%;
-    }
   }
 </style>

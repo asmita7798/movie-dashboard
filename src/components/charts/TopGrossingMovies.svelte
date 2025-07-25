@@ -5,25 +5,21 @@
   export let imdbCSV = [];
   let container;
   let tooltip;
+  let resizeObserver;
 
-  onMount(() => {
-    const margin = { top: 40, right: 30, bottom: 30, left: 50 };
-    const width = 800;
-    const height = 435;
+  function drawChart(width, height) {
+    const margin = { top: 20, right: 30, bottom: 60, left: 50 }; // moved chart up, extra bottom for labels
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
 
     d3.select(container).selectAll('*').remove();
 
     const svg = d3.select(container)
       .append('svg')
-      .attr('width', '100%')  // make width responsive
+      .attr('width', width)
       .attr('height', height)
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('preserveAspectRatio', 'xMidYMid meet')
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
 
     const filtered = imdbCSV
       .filter(d => d.Gross && d.Gross !== 'NA')
@@ -33,11 +29,12 @@
         gross: +d.Gross.replace(/,/g, '')
       }));
 
-    const top10 = filtered.sort((a, b) => b.gross - a.gross).slice(0, 10).reverse();
+    // Sort highest grossing on top
+    const top10 = filtered.sort((a, b) => b.gross - a.gross).slice(0, 10);
 
     const y = d3.scaleBand()
       .domain(top10.map(d => d.title))
-      .range([innerHeight, 0])
+      .range([0, innerHeight])
       .padding(0.3);
 
     const x = d3.scaleLinear()
@@ -45,23 +42,18 @@
       .nice()
       .range([0, innerWidth]);
 
-    svg.append('g')
-      .attr('transform', `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(x).tickFormat(d => `$${d / 1e6}M`))
-      .selectAll('text')
-      .style('fill', 'white')
-      .style('font-size', '16px');
-
-    svg.selectAll('rect')
+    // Bars
+    const bars = svg.selectAll('rect')
       .data(top10)
       .enter()
       .append('rect')
       .attr('y', d => y(d.title))
-      .attr('x', 0)
       .attr('height', y.bandwidth())
+      .attr('x', 0)
       .attr('width', d => x(d.gross))
       .attr('fill', '#facc15');
 
+    // Labels inside bars
     svg.selectAll('.bar-label')
       .data(top10)
       .enter()
@@ -73,17 +65,34 @@
       .attr('text-anchor', 'end')
       .text(d => d.title)
       .style('fill', 'black')
-      .style('font-size', '14px')
+      .style('font-size', d => {
+        const barWidth = x(d.gross);
+        return barWidth > 150 ? '11px' : barWidth > 100 ? '10px' : '8px';
+      })
       .style('font-weight', '600');
 
+    // X-axis with rotated labels
+    svg.append('g')
+      .attr('transform', `translate(0,${innerHeight})`)
+      .call(d3.axisBottom(x).tickFormat(d => `$${d / 1e6}M`))
+      .selectAll('text')
+      .style('fill', 'white')
+      .style('font-size', '12px')
+      .attr('transform', 'rotate(45)')
+      .attr('text-anchor', 'start')
+      .attr('dx', '0.5em')
+      .attr('dy', '0.5em');
+
+    // X-axis label
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + 45)
+      .attr('y', innerHeight + 60)
       .text('Gross Revenue')
       .attr('fill', '#facc15')
-      .style('font-size', '20px');
+      .style('font-size', '16px');
 
+    // Tooltip
     tooltip = d3.select(container)
       .append('div')
       .style('position', 'absolute')
@@ -91,12 +100,11 @@
       .style('color', 'black')
       .style('padding', '5px 10px')
       .style('border-radius', '6px')
-      .style('font-size', '16px')
+      .style('font-size', '12px')
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
-    svg.selectAll('rect')
-      .on('mouseover', (event, d) => {
+    bars.on('mouseover', (event, d) => {
         tooltip
           .style('opacity', 1)
           .html(`<strong>${d.title}</strong><br/>Year: ${d.year}<br/>Gross: $${d3.format(',')(d.gross)}`);
@@ -107,33 +115,38 @@
           .style('top', event.offsetY - 20 + 'px');
       })
       .on('mouseout', () => tooltip.style('opacity', 0));
+  }
+
+  onMount(() => {
+    resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        drawChart(width, height);
+      }
+    });
+    resizeObserver.observe(container);
   });
 </script>
 
 <style>
   .chart-card {
     background-color: #1e1e1e;
-    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
     width: 100%;
-    height: auto;
-    min-height: 300px;
-    max-width: 500px;
-    flex: 1 1 400px;
-    margin: auto;
+    height: 100%;
   }
-
   .title {
     color: #facc15;
     font-weight: bold;
     font-size: 1.3rem;
     text-align: center;
-    margin-bottom: 0;
+    margin-bottom: 1rem;
   }
 </style>
 
 <div class="chart-card">
   <div class="title">Top 10 Highest-Grossing Movies</div>
-  <div bind:this={container} style="width: 100%; position: relative;"></div>
+  <div bind:this={container} style="width: 100%; height: calc(100% - 2rem); position: relative;"></div>
 </div>
