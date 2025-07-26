@@ -54,8 +54,8 @@
       .call(d3.axisBottom(x).tickFormat(d3.format('d')))
       .selectAll('text')
       .style('fill', 'white')
-      .attr('transform', 'rotate(45)')
-      .attr('text-anchor', 'start')
+      .attr('transform', 'rotate(-30)')
+      .style('text-anchor', 'end')
       .style('font-size', '12px');
 
     svg.append('g')
@@ -106,7 +106,7 @@
         const closest = data.reduce((a, b) => Math.abs(b.year - year) < Math.abs(a.year - year) ? b : a);
         hoverLine.attr('x1', x(closest.year)).attr('x2', x(closest.year)).style('opacity', 1);
         tooltip.style('opacity', 1)
-          .html(`<strong>Year:</strong> ${closest.year}<br/>IMDb: ${closest.imdb.toFixed(2)}<br/>Metascore: ${closest.meta.toFixed(0)}`)
+          .html(`<strong>${closest.year}</strong> <br/>IMDb: ${closest.imdb.toFixed(2)}<br/>Metascore: ${closest.meta.toFixed(0)}`)
           .style('left', event.offsetX + 15 + 'px').style('top', event.offsetY - 28 + 'px');
       })
       .on('mouseout', () => { hoverLine.style('opacity', 0); tooltip.style('opacity', 0); });

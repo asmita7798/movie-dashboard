@@ -78,8 +78,8 @@
       .selectAll('text')
       .style('fill', 'white')
       .style('font-size', '12px')
-      .attr('transform', 'rotate(45)')
-      .attr('text-anchor', 'start')
+      .attr('transform', 'rotate(-30)')
+      .style('text-anchor', 'end')
       .attr('dx', '0.5em')
       .attr('dy', '0.5em');
 

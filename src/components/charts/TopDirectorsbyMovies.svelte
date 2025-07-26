@@ -78,8 +78,8 @@
       .call(d3.axisBottom(x))
       .selectAll('text')
       .style('fill', 'white')
-      .attr('transform', 'rotate(45)')
-      .attr('text-anchor', 'start')
+      .attr('transform', 'rotate(-30)')
+      .style('text-anchor', 'end')
       .style('font-size', '12px');
 
     svg.append('g')
@@ -115,8 +115,8 @@
       .attr('fill', '#facc15')
       .on('mouseover', (event, d) => {
         tooltip.style('display', 'block').html(
-          `<strong>Decade:</strong> ${d.decade}s<br/>
-           <strong>Director:</strong> ${d.director}<br/>
+          `<strong>Director:</strong> ${d.director}<br/>
+           <strong>Decade:</strong> ${d.decade}s<br/>
            <strong>Total Movies:</strong> ${d.value}`
         );
       })

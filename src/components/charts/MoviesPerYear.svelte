@@ -49,12 +49,12 @@
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x).tickFormat(d3.format("d")))
-      .selectAll('text').style('fill', 'white').style('font-size', '12px').attr('transform', 'rotate(45)')
-      .style('text-anchor', 'start');
+      .selectAll('text').style('fill', 'white').style('font-size', '13px').attr('transform', 'rotate(-30)')
+      .style('text-anchor', 'end');
 
     svg.append('g')
       .call(d3.axisLeft(y))
-      .selectAll('text').style('fill', 'white').style('font-size', '12px');
+      .selectAll('text').style('fill', 'white').style('font-size', '13px');
 
     svg.append('text')
       .attr('text-anchor', 'middle')
@@ -96,7 +96,7 @@
       .attr('r', 2).attr('fill', '#facc15').attr('fill-opacity', 0.5)
       .on('mouseover', (event, d) => {
         tooltip.style('opacity', 1)
-          .html(`<strong>Year:</strong> ${d[0]}<br/><strong>Total Movies:</strong> ${d[1]}`);
+          .html(`<strong>${d[0]}</strong> <br/>Total Movies: ${d[1]}`);
       })
       .on('mousemove', event => {
         tooltip.style('left', event.offsetX + 15 + 'px').style('top', event.offsetY - 28 + 'px');

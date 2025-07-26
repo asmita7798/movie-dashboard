@@ -48,8 +48,9 @@
 </section>
 
 <footer class="sticky-footer">
-  © 2025 <strong>Asmita Sengupta</strong>
+  © 2025 <strong>Asmita Sengupta</strong> – 🍿 Built on popcorn, passion, and a pinch of D3.
 </footer>
+
 
 <style>
   .chart-section {
@@ -67,7 +68,7 @@
     display: flex;
     justify-content: space-between;
     gap: 2rem;
-    margin-bottom: 2rem; /* spacing between rows */
+    margin-bottom: 2rem;
     flex-wrap: nowrap;
   }
 
@@ -90,32 +91,35 @@
     min-height: 400px;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* align top */
-    padding: 1rem; /* uniform top/bottom/left/right */
+    align-items: flex-start;
+    padding: 1rem;
     box-sizing: border-box;
   }
-  /* Adjust internal bubble chart width like top row */
   .full-width .flex-item.bubble-box > :global(*) {
     width: 95% !important;
     height: auto !important;
   }
-  /* Adjust title spacing */
   .full-width .flex-item.bubble-box :global(.title) {
     margin-bottom: 0.75rem;
   }
 
   /* Row 4 (two charts) */
-  .two-charts .flex-item {
-    flex: 1 1 48%;
-    height: 400px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .two-charts .flex-item > :global(*) {
-    width: 100% !important;
-    height: 100% !important;
-  }
+  /* Row 4 (two charts) */
+.two-charts .flex-item {
+  flex: 1 1 48%;
+  height: 450px; /* uniform for both charts */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+.two-charts .flex-item > :global(*) {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
 
   /* Responsive breakpoints */
   @media (max-width: 1100px) {
@@ -147,14 +151,17 @@
   }
 
   .sticky-footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: #facc15;
-    color: black;
-    text-align: left;
-    padding: 12px;
-    font-size: 14px;
-    z-index: 9999;
-  }
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #facc15;
+  color: black;
+  text-align: center;
+  padding: 12px 24px;
+  font-size: 14px;
+  z-index: 9999;
+  font-style: italic;
+}
+
+  
 </style>

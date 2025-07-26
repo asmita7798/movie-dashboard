@@ -28,28 +28,31 @@
         const gross = d.Gross && d.Gross !== 'NA' ? +d.Gross.replace(/,/g, '') : NaN;
         return !isNaN(year) && !isNaN(gross);
       })
-      .map(d => ({
-        decade: Math.floor(+d.Released_Year / 10) * 10,
-        gross: +d.Gross.replace(/,/g, '')
-      }));
+      .map(d => {
+        const year = +d.Released_Year;
+        // Group all 2010–2020 movies into 2010 decade
+        const decade = year >= 2020 ? 2010 : Math.floor(year / 10) * 10;
+        return { decade, gross: +d.Gross.replace(/,/g, '') };
+      });
 
-    const revenueByDecadeRaw = d3.rollups(
-      parsed,
-      v => d3.mean(v, d => d.gross),
-      d => d.decade
-    );
+    const revenueByDecade = Array.from(
+      d3.rollups(parsed, v => d3.mean(v, d => d.gross), d => d.decade),
+      ([decade, avg]) => ({ decade, avg })
+    ).sort((a, b) => a.decade - b.decade);
 
-    const revenueByDecade = revenueByDecadeRaw
-      .map(([decade, avg]) => ({ decade, avg }))
-      .sort((a, b) => a.decade - b.decade);
+    // --- Force domain cleanup (no 2020s tick) ---
+    const filteredData = revenueByDecade.filter(d => d.decade <= 2010);
+    const xDomain = Array.from(new Set(filteredData.map(d => `${d.decade}s`)));
+    console.log("Final X Domain (no 2020s):", xDomain);
 
+    // --- Scales ---
     const x = d3.scaleBand()
-      .domain(revenueByDecade.map(d => `${d.decade}s`))
+      .domain(xDomain)
       .range([0, innerWidth])
       .padding(0.4);
 
     const y = d3.scaleLinear()
-      .domain([0, d3.max(revenueByDecade, d => d.avg) * 1.1])
+      .domain([0, d3.max(filteredData, d => d.avg) * 1.1])
       .range([innerHeight, 0]);
 
     // --- Axes ---
@@ -59,8 +62,8 @@
       .selectAll('text')
       .style('fill', 'white')
       .style('font-size', '13px')
-      .attr('transform', 'rotate(45)')
-      .style('text-anchor', 'start');
+      .attr('transform', 'rotate(-30)')
+      .style('text-anchor', 'end');
 
     svg.append('g')
       .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1e6).toFixed(0)}M`))
@@ -79,7 +82,7 @@
 
     svg.append('text')
       .attr('text-anchor', 'middle')
-      .attr('transform', `translate(-50, ${innerHeight / 2}) rotate(-90)`)
+      .attr('transform', `translate(-60, ${innerHeight / 2}) rotate(-90)`)
       .text('Avg Gross Revenue')
       .attr('fill', '#facc15')
       .style('font-size', '16px');
@@ -96,9 +99,9 @@
       .style('pointer-events', 'none')
       .style('opacity', 0);
 
-    // --- Lollipop chart ---
+    // --- Lollipop chart (only filtered data) ---
     svg.selectAll('line.stem')
-      .data(revenueByDecade)
+      .data(filteredData)
       .enter()
       .append('line')
       .attr('class', 'stem')
@@ -110,7 +113,7 @@
       .attr('stroke-width', 2);
 
     svg.selectAll('circle.dot')
-      .data(revenueByDecade)
+      .data(filteredData)
       .enter()
       .append('circle')
       .attr('class', 'dot')

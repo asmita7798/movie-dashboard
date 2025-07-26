@@ -107,11 +107,14 @@
       .selectAll('text')
       .attr('transform', 'rotate(-30)')
       .style('text-anchor', 'end')
+      .style('font-size', '13px')
       .style('fill', 'white');
 
     svg.append('g')
       .call(d3.axisLeft(y))
       .selectAll('text')
+      .attr('transform', 'rotate(-30)')
+      .style('font-size', '13px')
       .style('fill', 'white');
 
     svg.selectAll('rect')
@@ -138,7 +141,7 @@
     // X-axis label
 svg.append('text')
   .attr('x', (width - margin.left - margin.right) / 2)
-  .attr('y', height - margin.top - 5)
+  .attr('y', height - margin.top - -5)
   .attr('text-anchor', 'middle')
   .style('fill', '#facc15')
   .style('font-size', '16px')
@@ -148,7 +151,7 @@ svg.append('text')
 svg.append('text')
   .attr('transform', 'rotate(-90)')
   .attr('x', -(height - margin.top - margin.bottom) / 2)
-  .attr('y', -margin.left + 20)
+  .attr('y', -margin.left + 13)
   .attr('text-anchor', 'middle')
   .style('fill', '#facc15')
   .style('font-size', '16px')
@@ -177,14 +180,14 @@ svg.append('text')
       .attr('x', 0)
       .attr('y', -5)
       .style('fill', 'white')
-      .style('font-size', '12px')
+      .style('font-size', '13px')
       .text('Low');
 
     legend.append('text')
       .attr('x', legendWidth)
       .attr('y', -5)
       .style('fill', 'white')
-      .style('font-size', '12px')
+      .style('font-size', '13px')
       .attr('text-anchor', 'end')
       .text('High');
   });
@@ -200,11 +203,6 @@ svg.append('text')
     max-width: 950px;
     margin: auto;
     text-align: center;
-  }
-  .tooltip {
-    position: absolute;
-    pointer-events: none;
-    z-index: 9999;
   }
 </style>
 

@@ -28,7 +28,6 @@
       .style('padding', '8px 10px')
       .style('border-radius', '8px')
       .style('font-size', '13px')
-      .style('font-weight', 'bold')
       .style('display', 'none')
       .style('pointer-events', 'none');
 
@@ -79,8 +78,8 @@
       .call(d3.axisBottom(x))
       .selectAll('text')
       .style('fill', 'white')
-      .attr('transform', 'rotate(45)')
-      .attr('text-anchor', 'start')
+      .attr('transform', 'rotate(-30)')
+      .style('text-anchor', 'end')
       .style('font-size', '12px');
 
     svg.append('g')
@@ -117,9 +116,9 @@
       .on('mouseover', (event, d) => {
         const avgGrossM = (d.value / 1e6).toFixed(2) + 'M';
         tooltip.style('display', 'block').html(`
-          <div><strong>Director:</strong> ${d.director}</div>
-          <div><strong>Decade:</strong> ${d.decade}s</div>
-          <div><strong>Avg Gross:</strong> $${avgGrossM}</div>
+          <strong>Director:</strong> ${d.director}<br/>
+          <strong>Decade:</strong> ${d.decade}s<br/>
+          <strong>Avg Gross:</strong> $${avgGrossM}
         `);
       })
       .on('mousemove', event => {
