@@ -9,13 +9,17 @@
   import StarDirectorNetwork from '../components/charts/StarDirectorNetwork.svelte';
   import RatingsOverTime from '../components/charts/RatingsOverTime.svelte';
   import StarHeatmap from '../components/charts/StarHeatmap.svelte';
+  import Recommendations from '../components/Recommendations.svelte';
 
   export let data;
   const { imdbCSV } = data;
+
+  let currentView = 'dashboard';
 </script>
 
-<Header {imdbCSV} />
+<Header {imdbCSV} bind:currentView />
 
+{#if currentView === 'dashboard'}
 <section class="chart-section">
   <div class="container">
 
@@ -46,24 +50,26 @@
 
   </div>
 </section>
+{:else if currentView === 'recommendations'}
+<section class="recommendation-section">
+  <Recommendations {imdbCSV} bind:currentView />
+</section>
+{/if}
 
 <footer class="sticky-footer">
   © 2025 <strong>Asmita Sengupta</strong> – 🍿 Built on popcorn, passion, and a pinch of D3.
 </footer>
-
 
 <style>
   .chart-section {
     padding: 2rem 2rem;
     background: #0a0a0a;
   }
-
   .container {
     max-width: 1300px;
     margin: 0 auto;
     padding: 0 1rem;
   }
-
   .flex-row {
     display: flex;
     justify-content: space-between;
@@ -71,8 +77,6 @@
     margin-bottom: 2rem;
     flex-wrap: nowrap;
   }
-
-  /* Row 1 & Row 3 (3 charts each) */
   .three-charts .flex-item {
     flex: 1 1 30%;
     height: 400px;
@@ -84,8 +88,6 @@
     width: 100% !important;
     height: 100% !important;
   }
-
-  /* Row 2 (full width Genre Bubble chart) */
   .full-width .flex-item.bubble-box {
     flex: 1 1 100%;
     min-height: 400px;
@@ -102,26 +104,20 @@
   .full-width .flex-item.bubble-box :global(.title) {
     margin-bottom: 0.75rem;
   }
+  .two-charts .flex-item {
+    flex: 1 1 48%;
+    height: 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 1rem;
+  }
+  .two-charts .flex-item > :global(*) {
+    width: 100% !important;
+    height: 100% !important;
+  }
 
-  /* Row 4 (two charts) */
-  /* Row 4 (two charts) */
-.two-charts .flex-item {
-  flex: 1 1 48%;
-  height: 450px; /* uniform for both charts */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 1rem;
-}
-.two-charts .flex-item > :global(*) {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-
-
-  /* Responsive breakpoints */
   @media (max-width: 1100px) {
     .flex-row {
       flex-wrap: wrap;
@@ -151,17 +147,15 @@
   }
 
   .sticky-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background-color: #facc15;
-  color: black;
-  text-align: center;
-  padding: 12px 24px;
-  font-size: 14px;
-  z-index: 9999;
-  font-style: italic;
-}
-
-  
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #facc15;
+    color: black;
+    text-align: center;
+    padding: 12px 24px;
+    font-size: 14px;
+    z-index: 9999;
+    font-style: italic;
+  }
 </style>

@@ -1,5 +1,6 @@
 <script>
   export let imdbCSV = [];
+  export let currentView;
 
   const validRows = imdbCSV.filter(row =>
     row['IMDB_Rating'] && row['Released_Year'] && row['Runtime']
@@ -56,6 +57,7 @@
     border-bottom: 4px solid #eab308;
     width: 100%;
     padding: 0.8rem 0;
+    position: relative;
   }
   .header-content {
     display: flex;
@@ -72,7 +74,26 @@
     margin: 0;
   }
 
-  /* Single row grid */
+  .recommend-btn {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #111;
+    color: #facc15;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    transition: all 0.2s ease;
+  }
+  .recommend-btn:hover {
+    background: #333;
+    transform: translateY(-50%) scale(1.05);
+  }
+
   .stats.single-row {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -81,8 +102,6 @@
     padding: 1rem 2rem;
     box-sizing: border-box;
   }
-
-  /* Horizontal divider */
   .horizontal-divider {
     border: none;
     border-top: 2px solid #facc15;
@@ -90,7 +109,6 @@
     width: calc(100% - 4rem);
   }
 
-  /* Card styling */
   .stat-card {
     display: flex;
     flex-direction: column;
@@ -107,7 +125,6 @@
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.7);
   }
-
   .stat-value {
     font-size: 1.1rem;
     font-weight: bold;
@@ -120,7 +137,6 @@
     text-align: center;
   }
 
-  /* Responsive - auto-wrap on small screens */
   @media (max-width: 1200px) {
     .stats.single-row {
       grid-template-columns: repeat(5, 1fr);
@@ -136,22 +152,24 @@
 <div class="header-full">
   <div class="header-content">
     <h1>IMDb Top 1000 Movie Dashboard</h1>
+    <button class="recommend-btn" on:click={() => currentView = 'recommendations'}>
+      Explore
+    </button>
   </div>
 </div>
 
-<!-- Single row of all 10 cards -->
-<div class="stats single-row">
-  <div class="stat-card"><div class="stat-value">{totalMovies}</div><div class="stat-label">Total Movies</div></div>
-  <div class="stat-card"><div class="stat-value">{avgRating}</div><div class="stat-label">Avg IMDb Rating</div></div>
-  <div class="stat-card"><div class="stat-value">{totalDirectors}</div><div class="stat-label">Directors</div></div>
-  <div class="stat-card"><div class="stat-value">{totalStars}</div><div class="stat-label">Stars</div></div>
-  <div class="stat-card"><div class="stat-value">{avgRuntime} min</div><div class="stat-label">Avg Runtime</div></div>
-  <div class="stat-card"><div class="stat-value">{genreCount}</div><div class="stat-label">Genres</div></div>
-  <div class="stat-card"><div class="stat-value">{popularDirector}</div><div class="stat-label">Most Movies Directed</div></div>
-  <div class="stat-card"><div class="stat-value">{popularStar}</div><div class="stat-label">Most Appeared Star</div></div>
-  <div class="stat-card"><div class="stat-value">{topGenre}</div><div class="stat-label">Genre with Most Movies</div></div>
-  <div class="stat-card"><div class="stat-value">{topRatedMovie}</div><div class="stat-label">Top IMDb Movie</div></div>
-</div>
-
-<!-- Horizontal Divider -->
-<hr class="horizontal-divider" />
+{#if currentView === 'dashboard'}
+  <div class="stats single-row">
+    <div class="stat-card"><div class="stat-value">{totalMovies}</div><div class="stat-label">Total Movies</div></div>
+    <div class="stat-card"><div class="stat-value">{avgRating}</div><div class="stat-label">Avg IMDb Rating</div></div>
+    <div class="stat-card"><div class="stat-value">{totalDirectors}</div><div class="stat-label">Directors</div></div>
+    <div class="stat-card"><div class="stat-value">{totalStars}</div><div class="stat-label">Stars</div></div>
+    <div class="stat-card"><div class="stat-value">{avgRuntime} min</div><div class="stat-label">Avg Runtime</div></div>
+    <div class="stat-card"><div class="stat-value">{genreCount}</div><div class="stat-label">Genres</div></div>
+    <div class="stat-card"><div class="stat-value">{popularDirector}</div><div class="stat-label">Most Movies Directed</div></div>
+    <div class="stat-card"><div class="stat-value">{popularStar}</div><div class="stat-label">Most Appeared Star</div></div>
+    <div class="stat-card"><div class="stat-value">{topGenre}</div><div class="stat-label">Genre with Most Movies</div></div>
+    <div class="stat-card"><div class="stat-value">{topRatedMovie}</div><div class="stat-label">Top IMDb Movie</div></div>
+  </div>
+  <hr class="horizontal-divider" />
+{/if}
