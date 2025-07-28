@@ -3,8 +3,8 @@
   import * as d3 from 'd3';
 
   export let imdbCSV = [];
-  let wrapper;     // for fullscreen target
-  let container;   // network rendering area
+  let wrapper;
+  let container;
   let tooltip;
   let zoomBehavior;
   let svgRoot;
@@ -15,16 +15,13 @@
   });
 
   function toggleFullscreen(event) {
-    event.stopPropagation(); // prevent zoom handler
-    if (!document.fullscreenElement) {
-      wrapper.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
+    event.stopPropagation();
+    if (!document.fullscreenElement) wrapper.requestFullscreen();
+    else document.exitFullscreen();
   }
 
   function resetZoom(event) {
-    event.stopPropagation(); // prevent zoom handler
+    event.stopPropagation();
     const nodesGroup = svgRoot.select('g');
     const bounds = nodesGroup.node().getBBox();
     const fullWidth = container.clientWidth;
@@ -33,20 +30,18 @@
     const height = bounds.height;
     const midX = bounds.x + width / 2;
     const midY = bounds.y + height / 2;
-
     const scale = 0.85 / Math.max(width / fullWidth, height / fullHeight);
     const translate = [
       fullWidth / 2 - scale * midX,
       fullHeight / 2 - scale * midY
     ];
-
     svgRoot.transition().duration(750)
       .call(zoomBehavior.transform,
-            d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+        d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
   }
 
   function fitToScreen() {
-    resetZoom(new Event("custom")); // initial fit
+    resetZoom(new Event("custom"));
   }
 
   function drawNetwork() {
@@ -230,8 +225,8 @@
 </script>
 
 <style>
- .chart-card {
-  background: radial-gradient(circle at center, #1e1e1e 40%, #111 100%);
+.chart-card {
+  background-color: #1e1e1e;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
   width: 100%;
@@ -266,11 +261,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
-  z-index: 1000;         /* keeps above SVG */
-  pointer-events: auto;  /* ensure clickable */
+  z-index: 1000;
+  pointer-events: auto;
 }
-
 .reset-button { right: 10px; }
 .fullscreen-button { right: 56px; }
 
@@ -287,15 +280,18 @@
   flex-direction: column;
   gap: 4px;
 }
-
 .legend-item { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 4px; }
 .legend-circle { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend-title { font-weight: bold; margin-top: 4px; }
+.legend-scale { display: flex; align-items: center; gap: 4px; }
 </style>
 
 <div class="chart-card" bind:this={wrapper}>
-  <div class="title">Star–Director Network</div>
+  <div class="title">Director–Star Collaboration Network</div>
   <button class="fullscreen-button" on:click={toggleFullscreen} aria-label="Full Screen">⛶</button>
   <button class="reset-button" on:click={resetZoom} aria-label="Reset Zoom">↻</button>
+
+  <!-- Updated Legend -->
   <div class="legend-box">
     <div class="legend-item">
       <span class="legend-circle" style="background:#facc15;"></span> Director
@@ -303,18 +299,21 @@
     <div class="legend-item">
       <span class="legend-circle" style="background:#fb923c;"></span> Star
     </div>
-    <div class="legend-item">
-      <svg width="80" height="10">
+    <div class="legend-title">Collaboration Strength</div>
+    <div class="legend-scale">
+      <span>Few</span>
+      <svg width="100" height="12">
         <defs>
           <linearGradient id="edgeGradient" x1="0%" x2="100%">
             <stop offset="0%" stop-color="#aaa"/>
             <stop offset="100%" stop-color="#f87171"/>
           </linearGradient>
         </defs>
-        <rect width="80" height="10" fill="url(#edgeGradient)"></rect>
+        <rect width="100" height="12" fill="url(#edgeGradient)" rx="2" ry="2"></rect>
       </svg>
-      <span>1 → Max movies</span>
+      <span>Many</span>
     </div>
   </div>
+
   <div bind:this={container} style="width: 100%; height: 100%; position: relative;"></div>
 </div>

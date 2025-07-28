@@ -21,7 +21,7 @@
   onMount(() => {
     d3.select(container).selectAll('*').remove();
 
-    const margin = { top: 40, right: 30, bottom: 60, left: 120 };
+    const margin = { top: 40, right: 40, bottom: 30, left: 140 };
     const width = 800;
     const height = 450;
 
@@ -107,14 +107,14 @@
       .selectAll('text')
       .attr('transform', 'rotate(-30)')
       .style('text-anchor', 'end')
-      .style('font-size', '13px')
+      .style('font-size', '14px')
       .style('fill', 'white');
 
     svg.append('g')
       .call(d3.axisLeft(y))
       .selectAll('text')
       .attr('transform', 'rotate(-30)')
-      .style('font-size', '13px')
+      .style('font-size', '14px')
       .style('fill', 'white');
 
     svg.selectAll('rect')
@@ -141,10 +141,10 @@
     // X-axis label
 svg.append('text')
   .attr('x', (width - margin.left - margin.right) / 2)
-  .attr('y', height - margin.top - -5)
+  .attr('y', height - margin.top + 40)
   .attr('text-anchor', 'middle')
   .style('fill', '#facc15')
-  .style('font-size', '16px')
+  .style('font-size', '18px')
   .text('Genres');
 
 // Y-axis label
@@ -154,7 +154,7 @@ svg.append('text')
   .attr('y', -margin.left + 13)
   .attr('text-anchor', 'middle')
   .style('fill', '#facc15')
-  .style('font-size', '16px')
+  .style('font-size', '18px')
   .text('Stars');
 
 
@@ -180,14 +180,14 @@ svg.append('text')
       .attr('x', 0)
       .attr('y', -5)
       .style('fill', 'white')
-      .style('font-size', '13px')
+      .style('font-size', '14px')
       .text('Low');
 
     legend.append('text')
       .attr('x', legendWidth)
       .attr('y', -5)
       .style('fill', 'white')
-      .style('font-size', '13px')
+      .style('font-size', '14px')
       .attr('text-anchor', 'end')
       .text('High');
   });
@@ -200,6 +200,7 @@ svg.append('text')
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.05);
     width: 100%;
+    height: 450px;
     max-width: 950px;
     margin: auto;
     text-align: center;
@@ -208,7 +209,7 @@ svg.append('text')
 
 <div class="chart-card">
   <div style="color:#facc15;font-weight:bold;font-size:1.3rem;margin-bottom:1rem;">
-    Star vs Genre Heatmap
+    Stars Across Genres
   </div>
   <div bind:this={container} style="width: 100%; height: 450px; position: relative;"></div>
 </div>

@@ -61,7 +61,7 @@
       .call(d3.axisBottom(x))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '13px')
+      .style('font-size', '12px')
       .attr('transform', 'rotate(-30)')
       .style('text-anchor', 'end');
 
@@ -69,23 +69,23 @@
       .call(d3.axisLeft(y).tickFormat(d => `$${(d / 1e6).toFixed(0)}M`))
       .selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '13px');
+      .style('font-size', '12px');
 
     // Axis labels
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + 60)
+      .attr('y', innerHeight + 50)
       .text('Decade')
       .attr('fill', '#facc15')
-      .style('font-size', '16px');
+      .style('font-size', '14px');
 
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('transform', `translate(-60, ${innerHeight / 2}) rotate(-90)`)
       .text('Avg Gross Revenue')
       .attr('fill', '#facc15')
-      .style('font-size', '16px');
+      .style('font-size', '14px');
 
     // Tooltip
     tooltip = d3.select(container)

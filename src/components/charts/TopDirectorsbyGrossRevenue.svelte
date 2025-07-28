@@ -97,7 +97,7 @@
 
     svg.append('text')
       .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + 55)  // position below the axis ticks
+      .attr('y', innerHeight + 55) 
       .attr('text-anchor', 'middle')
       .text('Year')
       .attr('fill', '#facc15')
@@ -155,8 +155,9 @@
       .attr('x', innerWidth / 2)
       .attr('y', -40)
       .attr('text-anchor', 'middle')
-      .text('Top Director by Gross Revenue')
+      .text('Top Director by Revenue')
       .attr('fill', '#facc15')
+      .style('text-align', 'center')
       .style('font-size', '20px')
       .style('font-weight', 'bold');
   }

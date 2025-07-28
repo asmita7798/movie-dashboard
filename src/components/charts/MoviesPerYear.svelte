@@ -18,7 +18,7 @@
   }
 
   function drawChart(width, height) {
-    const margin = { top: 40, right: 30, bottom: 50, left: 60 };
+    const margin = { top: 40, right: 30, bottom: 70, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -49,24 +49,26 @@
     svg.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(x).tickFormat(d3.format("d")))
-      .selectAll('text').style('fill', 'white').style('font-size', '13px').attr('transform', 'rotate(-30)')
+      .selectAll('text').style('fill', 'white').style('font-size', '12px').attr('transform', 'rotate(-30)')
       .style('text-anchor', 'end');
 
     svg.append('g')
       .call(d3.axisLeft(y))
-      .selectAll('text').style('fill', 'white').style('font-size', '13px');
+      .selectAll('text').style('fill', 'white').style('font-size', '12px');
 
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('x', innerWidth / 2)
       .attr('y', innerHeight + 50)
       .text('Year')
+      .style('font-size', '14px')
       .attr('fill', '#facc15');
 
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('transform', `translate(-40, ${innerHeight / 2}) rotate(-90)`)
       .text('Count of Movies')
+      .style('font-size', '14px')
       .attr('fill', '#facc15');
 
     const gradient = svg.append("defs").append("linearGradient")

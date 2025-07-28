@@ -97,7 +97,7 @@
 
     svg.append('text')
   .attr('x', innerWidth / 2)
-  .attr('y', innerHeight + 55)  // position below the axis ticks
+  .attr('y', innerHeight + 55) 
   .attr('text-anchor', 'middle')
   .text('Year')
   .attr('fill', '#facc15')

@@ -8,7 +8,7 @@
   let resizeObserver;
 
   function drawChart(width, height) {
-    const margin = { top: 20, right: 30, bottom: 60, left: 50 }; // moved chart up, extra bottom for labels
+    const margin = { top: 20, right: 30, bottom: 70, left: 50 }; // moved chart up, extra bottom for labels
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -87,10 +87,10 @@
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('x', innerWidth / 2)
-      .attr('y', innerHeight + 60)
+      .attr('y', innerHeight + 50)
       .text('Gross Revenue')
       .attr('fill', '#facc15')
-      .style('font-size', '16px');
+      .style('font-size', '14px');
 
     // Tooltip
     tooltip = d3.select(container)

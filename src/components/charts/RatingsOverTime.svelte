@@ -8,7 +8,7 @@
   let resizeObserver;
 
   function drawChart(width, height) {
-    const margin = { top: 40, right: 40, bottom: 50, left: 60 };
+    const margin = { top: 40, right: 40, bottom: 70, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -113,10 +113,10 @@
 
     // Legend
     const legend = svg.append('g').attr('transform', `translate(${innerWidth - 120}, -10)`);
-    legend.append('circle').attr('cx', 0).attr('cy', 0).attr('r', 6).attr('fill', '#facc15');
-    legend.append('text').attr('x', 12).attr('y', 5).attr('fill', 'white').text('IMDb Rating');
-    legend.append('circle').attr('cx', 0).attr('cy', 24).attr('r', 6).attr('fill', '#fb923c');
-    legend.append('text').attr('x', 12).attr('y', 29).attr('fill', 'white').text('Metascore');
+    legend.append('circle').attr('cx', 6).attr('cy', 0).attr('r', 4).attr('fill', '#facc15');
+    legend.append('text').attr('x', 18).attr('y', 5).attr('fill', 'white').style('font-size', '12px').text('IMDb Rating');
+    legend.append('circle').attr('cx', 6).attr('cy', 14).attr('r', 4).attr('fill', '#fb923c');
+    legend.append('text').attr('x', 18).attr('y', 19).attr('fill', 'white').style('font-size', '12px').text('Metascore');
   }
 
   onMount(() => {
