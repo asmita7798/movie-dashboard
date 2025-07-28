@@ -15,18 +15,20 @@
   let selectedGenre = '';
   let genreMovies = [];
 
-  // Helper to create local poster path
+  // Use BASE_URL for GitHub Pages
+  const BASE_URL = import.meta.env.BASE_URL;
+
   function getPosterPath(title) {
-    return `/posters/${title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}.jpg`;
+    const fileName = title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() + '.jpg';
+    return `${BASE_URL}posters/${fileName}`;
   }
 
-  // Filter movies that have posters locally
   function filterMoviesWithPoster(movies) {
     return movies.map(m => ({ ...m, Poster_Path: getPosterPath(m.Series_Title) }));
   }
 
   onMount(async () => {
-    const res = await fetch('/similarity.json');
+    const res = await fetch(`${BASE_URL}similarity.json`);
     similarityData = await res.json();
 
     // Popular picks
@@ -106,7 +108,8 @@
     <div class="scroll-row">
       {#each recommendedMovies as movie}
         <div class="card fade-in">
-          <img src={movie.Poster_Path} loading="lazy" alt={movie.Series_Title} />
+          <img src={movie.Poster_Path} loading="lazy" alt={movie.Series_Title}
+               on:error={(e) => e.target.style.display='none'} />
           <div class="title">{movie.Series_Title}</div>
         </div>
       {/each}
@@ -117,7 +120,8 @@
   <div class="scroll-row">
     {#each popularPicks as movie}
       <div class="card fade-in">
-        <img src={movie.Poster_Path} alt={movie.Series_Title} loading="lazy" />
+        <img src={movie.Poster_Path} alt={movie.Series_Title} loading="lazy"
+             on:error={(e) => e.target.style.display='none'} />
         <div class="title">{movie.Series_Title}</div>
       </div>
     {/each}
@@ -138,7 +142,8 @@
     <div class="scroll-row">
       {#each genreMovies as movie}
         <div class="card fade-in">
-          <img src={movie.Poster_Path} alt={movie.Series_Title} />
+          <img src={movie.Poster_Path} alt={movie.Series_Title}
+               on:error={(e) => e.target.style.display='none'} />
           <div class="title">{movie.Series_Title}</div>
         </div>
       {/each}
@@ -149,7 +154,8 @@
   <div class="scroll-row">
     {#each topIMDBMovies as movie}
       <div class="card fade-in">
-        <img src={movie.Poster_Path} alt={movie.Series_Title} />
+        <img src={movie.Poster_Path} alt={movie.Series_Title}
+             on:error={(e) => e.target.style.display='none'} />
         <div class="title">{movie.Series_Title}</div>
       </div>
     {/each}
@@ -159,7 +165,8 @@
   <div class="scroll-row">
     {#each criticsPicks as movie}
       <div class="card fade-in">
-        <img src={movie.Poster_Path} alt={movie.Series_Title} />
+        <img src={movie.Poster_Path} alt={movie.Series_Title}
+             on:error={(e) => e.target.style.display='none'} />
         <div class="title">{movie.Series_Title}</div>
       </div>
     {/each}
