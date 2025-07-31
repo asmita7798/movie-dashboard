@@ -150,7 +150,7 @@
     </div>
   {/if}
 
-  <h2>Top 10 IMDb Movies</h2>
+  <h2>Top IMDb Movies</h2>
   <div class="scroll-row">
     {#each topIMDBMovies as movie}
       <div class="card fade-in">
