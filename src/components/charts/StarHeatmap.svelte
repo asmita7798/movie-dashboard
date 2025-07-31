@@ -21,7 +21,7 @@
   onMount(() => {
     d3.select(container).selectAll('*').remove();
 
-    const margin = { top: 40, right: 40, bottom: 30, left: 140 };
+    const margin = { top: 40, right: 40, bottom: 60, left: 160 };
     const width = 800;
     const height = 450;
 
@@ -32,9 +32,8 @@
       .attr('viewBox', `0 0 ${width} ${height}`)
       .attr('preserveAspectRatio', 'xMidYMid meet')
       .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top-70})`);
+      .attr('transform', `translate(${margin.left},${margin.top - 70})`);
 
-    // Tooltip now on body for better stacking
     const tooltip = d3.select('body')
       .append('div')
       .attr('class', 'tooltip')
@@ -87,6 +86,13 @@
       });
     });
 
+    // Reverse mapping: Group -> Genres
+    const groupToGenres = {};
+    Object.entries(genreGroupMap).forEach(([genre, group]) => {
+      if (!groupToGenres[group]) groupToGenres[group] = [];
+      groupToGenres[group].push(genre);
+    });
+
     const x = d3.scaleBand()
       .domain(genres)
       .range([0, width - margin.left - margin.right])
@@ -94,29 +100,61 @@
 
     const y = d3.scaleBand()
       .domain(topStars)
-      .range([0, height - margin.top - margin.bottom - 20]) // move chart up
+      .range([0, height - margin.top - margin.bottom - 20])
       .padding(0.05);
 
+    // --- Color Scale ---
+    const counts = data.map(d => d.count).filter(c => c > 0);
+    const minNonZero = d3.min(counts);
+    const maxCount = d3.max(counts);
+
+    const customInterpolator = t => {
+      if (t < 0.5) return d3.interpolate("#fff7cc", "#facc15")(t * 2);
+      return d3.interpolate("#facc15", "#fb923c")((t - 0.5) * 2);
+    };
+
     const color = d3.scaleSequential()
-      .interpolator(d3.interpolateYlOrBr)
-      .domain([0, d3.max(data, d => d.count)]);
+      .domain([minNonZero, maxCount])
+      .interpolator(customInterpolator);
 
-    svg.append('g')
+    // --- X-axis ---
+    const xAxisGroup = svg.append('g')
+      .attr('class', 'x-axis')
       .attr('transform', `translate(0,${height - margin.top - margin.bottom - 20})`)
-      .call(d3.axisBottom(x))
-      .selectAll('text')
+      .call(d3.axisBottom(x).tickSize(0));
+
+    xAxisGroup.select(".domain").remove();
+    xAxisGroup.selectAll("text")
+      .style('font-size', '14px')
+      .style('fill', 'white')
       .attr('transform', 'rotate(-30)')
+      .attr('dx', '-0.6em')
+      .attr('dy', '0.5em')
       .style('text-anchor', 'end')
+      .on("mouseover", (event, genre) => {
+        const group = genreGroupMap[genre] || genre;
+        const allGenres = groupToGenres[group] || [genre];
+        tooltip.style("opacity", 1)
+          .html(`<strong>Group:</strong> ${group}<br><strong>Genres:</strong> ${allGenres.join(', ')}`);
+      })
+      .on("mousemove", event => {
+        tooltip
+          .style("left", event.pageX + 20 + "px")
+          .style("top", event.pageY - 20 + "px");
+      })
+      .on("mouseout", () => tooltip.style("opacity", 0));
+
+    // --- Y-axis ---
+    const yAxisGroup = svg.append('g')
+      .attr('class', 'y-axis')
+      .call(d3.axisLeft(y).tickSize(0));
+
+    yAxisGroup.select(".domain").remove();
+    yAxisGroup.selectAll("text")
       .style('font-size', '14px')
       .style('fill', 'white');
 
-    svg.append('g')
-      .call(d3.axisLeft(y))
-      .selectAll('text')
-      .attr('transform', 'rotate(-30)')
-      .style('font-size', '14px')
-      .style('fill', 'white');
-
+    // --- Rectangles ---
     svg.selectAll('rect')
       .data(data)
       .enter()
@@ -127,8 +165,7 @@
       .attr('height', y.bandwidth())
       .style('fill', d => d.count === 0 ? '#333' : color(d.count))
       .on('mouseover', (event, d) => {
-        tooltip
-          .style('opacity', 1)
+        tooltip.style('opacity', 1)
           .html(`<strong>${d.star}</strong><br/>${d.genre}: ${d.count}`);
       })
       .on('mousemove', event => {
@@ -138,43 +175,43 @@
       })
       .on('mouseout', () => tooltip.style('opacity', 0));
 
-    // X-axis label
-svg.append('text')
-  .attr('x', (width - margin.left - margin.right) / 2)
-  .attr('y', height - margin.top + 40)
-  .attr('text-anchor', 'middle')
-  .style('fill', '#facc15')
-  .style('font-size', '18px')
-  .text('Genres');
+    // --- Axis Labels ---
+    svg.append('text')
+      .attr('x', (width - margin.left - margin.right) / 2)
+      .attr('y', height - margin.top + 50)
+      .attr('text-anchor', 'middle')
+      .style('fill', '#facc15')
+      .style('font-size', '18px')
+      .text('Genres');
 
-// Y-axis label
-svg.append('text')
-  .attr('transform', 'rotate(-90)')
-  .attr('x', -(height - margin.top - margin.bottom) / 2)
-  .attr('y', -margin.left + 13)
-  .attr('text-anchor', 'middle')
-  .style('fill', '#facc15')
-  .style('font-size', '18px')
-  .text('Stars');
+    svg.append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -(height - margin.top - margin.bottom) / 2)
+      .attr('y', -margin.left + 20)
+      .attr('text-anchor', 'middle')
+      .style('fill', '#facc15')
+      .style('font-size', '18px')
+      .text('Stars');
 
-
-    // Legend moved up
+    // --- Legend ---
     const legendWidth = 200;
     const legendHeight = 10;
-    const legendData = d3.range(0, 1.01, 0.01);
 
     const legend = svg.append('g')
-  .attr('transform', `translate(${width - margin.left - margin.right - legendWidth}, -30)`);
+      .attr('transform', `translate(${width - margin.left - margin.right - legendWidth}, -30)`);
 
+    const legendGradient = legend.append('defs')
+      .append('linearGradient')
+      .attr('id', 'legendGradient');
 
-    legend.selectAll('rect')
-      .data(legendData)
-      .enter().append('rect')
-      .attr('x', (d, i) => i * (legendWidth / legendData.length))
-      .attr('y', 0)
-      .attr('width', legendWidth / legendData.length)
+    legendGradient.append('stop').attr('offset', '0%').attr('stop-color', '#fff7cc');
+    legendGradient.append('stop').attr('offset', '50%').attr('stop-color', '#facc15');
+    legendGradient.append('stop').attr('offset', '100%').attr('stop-color', '#fb923c');
+
+    legend.append('rect')
+      .attr('width', legendWidth)
       .attr('height', legendHeight)
-      .attr('fill', d => color(d * d3.max(data, e => e.count)));
+      .style('fill', 'url(#legendGradient)');
 
     legend.append('text')
       .attr('x', 0)
@@ -190,6 +227,14 @@ svg.append('text')
       .style('font-size', '14px')
       .attr('text-anchor', 'end')
       .text('High');
+
+    legend.append('text')
+      .attr('x', legendWidth / 2)
+      .attr('y', -20)
+      .attr('text-anchor', 'middle')
+      .style('fill', 'white')
+      .style('font-size', '14px')
+      .text('Genre Presence');
   });
 </script>
 
