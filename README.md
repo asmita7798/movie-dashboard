@@ -1,38 +1,73 @@
-# sv
+# 🎬 IMDb Top 1000 Movie Dashboard  
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+[![View Live](https://img.shields.io/badge/View-Live%20Demo-brightgreen)](https://asmita7798.github.io/movie-dashboard/)  
 
-## Creating a project
+An interactive dashboard showcasing IMDb's Top 1000 movies (1920–2020), designed for **cinephiles, movie buffs, film students, and anyone interested in exploring cinematic history and trends**.  
 
-If you're seeing this, you've probably already done this step. Congrats!
+---
 
-```bash
-# create a new project in the current directory
-npx sv create
+## ✨ Features  
 
-# create a new project in my-app
-npx sv create my-app
-```
+- **Movie release trends** from 1920 to 2020  
+- **Average gross revenue by decade**  
+- **Top 10 highest-grossing movies**  
+- **Genre trends bubble chart** to explore movie distribution across genres  
+- **Stars across genres heat map** showing how popular stars appear across different genres  
+- **Director–Star collaboration network** visualizing how many movies directors and stars worked on together and who collaborated with whom  
+- **Movie recommendation features** including:  
+  - Popular Picks  
+  - Critic’s Choice  
+  - Top IMDb Hits  
+  - Movies by Genre  
+  - Movies recommended based on another movie  
 
-## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+---
 
-```bash
-npm run dev
+## 📊 Tech Stack  
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+- **Frontend:** [Svelte](https://svelte.dev/)  
+- **Charts:** [D3.js](https://d3js.org/)  
+- **Hosting:** GitHub Pages  
 
-## Building
+---
 
-To create a production version of your app:
+## 🚀 Live Demo  
 
-```bash
-npm run build
-```
+🔗 **[View Dashboard](https://asmita7798.github.io/movie-dashboard/)**  
 
-You can preview the production build with `npm run preview`.
+---
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## 📂 Dataset  
+
+Includes IMDb Top 1000 movie details:  
+- Titles, release year, runtime, poster links 
+- IMDb ratings, meta scores  
+- Genres, directors, and stars  
+- Gross revenue and vote counts, and much more  
+
+*(Dataset source: [IMDb Movies Dataset on Kaggle](https://www.kaggle.com/datasets/harshitshankhdhar/imdb-dataset-of-top-1000-movies-and-tv-shows))*
+
+---
+
+## 🛠️ Run Locally  
+
+1. **Clone the repo:**  
+   ```bash
+   git clone https://github.com/asmita7798/movie-dashboard.git
+   cd movie-dashboard
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Run development server:**
+   ```bash
+   npm run dev
+   ```
+4.  **Build for production:**
+    ```bash
+    npm run build
+    ```
