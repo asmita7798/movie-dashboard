@@ -31,7 +31,7 @@
       .map(d => {
         const year = +d.Released_Year;
         // Group all 2010–2020 movies into 2010 decade
-        const decade = year >= 2020 ? 2010 : Math.floor(year / 10) * 10;
+        const decade = year >= 2010 ? 2010 : Math.floor(year / 10) * 10;
         return { decade, gross: +d.Gross.replace(/,/g, '') };
       });
 

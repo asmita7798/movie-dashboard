@@ -44,7 +44,7 @@
         director: d.Director.trim(),
         decade: Math.floor(+d.Released_Year / 10) * 10,
         gross: d.Gross && d.Gross !== 'NA' ? +d.Gross.replace(/,/g, '') : 0
-      }));
+      })).filter(d => d.decade !== 2020);;
 
     const nested = d3.rollup(
       parsed,
