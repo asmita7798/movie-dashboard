@@ -178,7 +178,7 @@
     // --- Axis Labels ---
     svg.append('text')
       .attr('x', (width - margin.left - margin.right) / 2)
-      .attr('y', height - margin.top + 50)
+      .attr('y', height - margin.top + 20)
       .attr('text-anchor', 'middle')
       .style('fill', '#facc15')
       .style('font-size', '18px')

@@ -116,16 +116,7 @@
     </div>
   {/if}
 
-  <h2>Popular Picks</h2>
-  <div class="scroll-row">
-    {#each popularPicks as movie}
-      <div class="card fade-in">
-        <img src={movie.Poster_Path} alt={movie.Series_Title} loading="lazy"
-             on:error={(e) => e.target.style.display='none'} />
-        <div class="title">{movie.Series_Title}</div>
-      </div>
-    {/each}
-  </div>
+  
 
   <h2>Pick by Genre</h2>
   <div class="genre-select">
